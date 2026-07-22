@@ -45,6 +45,11 @@ fun CalculatorScreen() {
     val historyList = remember { mutableStateListOf<HistoryItem>() }
     val engine = remember { CalculatorEngine() }
 
+    fun formatPrecision(valStr: String): String {
+        val num = valStr.toDoubleOrNull() ?: return valStr
+        return "%.${decimalPrecision}f".format(num).trimEnd('0').trimEnd('.')
+    }
+
     fun onAction(action: String) {
         when (action) {
             "AC" -> {
@@ -54,32 +59,37 @@ fun CalculatorScreen() {
             "⌫" -> {
                 if (expression.isNotEmpty()) {
                     expression = expression.dropLast(1)
-                    result = if (expression.isEmpty()) "0" else engine.evaluate(expression)
+                    val rawEval = if (expression.isEmpty()) "0" else engine.evaluate(expression)
+                    result = if (rawEval != "Error") formatPrecision(rawEval) else rawEval
                 }
             }
             "=" -> {
                 val finalEval = engine.evaluate(expression)
                 if (finalEval != "Error" && expression.isNotEmpty()) {
-                    result = finalEval
-                    historyList.add(0, HistoryItem(expression, finalEval))
+                    result = formatPrecision(finalEval)
+                    historyList.add(0, HistoryItem(expression, result))
                 }
             }
             "DEG/RAD" -> {
                 currentAngleMode = if (currentAngleMode == AngleMode.DEG) AngleMode.RAD else AngleMode.DEG
                 engine.angleMode = currentAngleMode
-                if (expression.isNotEmpty()) result = engine.evaluate(expression)
+                if (expression.isNotEmpty()) {
+                    val eval = engine.evaluate(expression)
+                    if (eval != "Error") result = formatPrecision(eval)
+                }
             }
             "MC" -> engine.memoryClear()
             "MR" -> {
                 expression += engine.memoryRecall()
-                result = engine.evaluate(expression)
+                val eval = engine.evaluate(expression)
+                if (eval != "Error") result = formatPrecision(eval)
             }
             "M+" -> engine.memoryAdd(result)
             "M-" -> engine.memorySubtract(result)
             else -> {
                 expression += action
                 val eval = engine.evaluate(expression)
-                if (eval != "Error") result = eval
+                if (eval != "Error") result = formatPrecision(eval)
             }
         }
     }
@@ -90,14 +100,13 @@ fun CalculatorScreen() {
             .background(bgColor)
             .padding(16.dp)
     ) {
-        // --- NAVIGATION TABS ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            AppTab.values().forEach { tab ->
+            AppTab.entries.forEach { tab ->
                 Text(
                     text = tab.name.take(4),
                     color = if (selectedTab == tab) ElectricBlue else secondaryTextColor,
@@ -110,7 +119,7 @@ fun CalculatorScreen() {
             }
         }
 
-        Divider(color = secondaryTextColor.copy(alpha = 0.2f), thickness = 1.dp)
+        HorizontalDivider(color = secondaryTextColor.copy(alpha = 0.2f), thickness = 1.dp)
 
         when (selectedTab) {
             AppTab.CALCULATOR -> {
@@ -196,7 +205,7 @@ fun CalculatorScreen() {
                         Row(modifier = Modifier.fillMaxWidth()) {
                             CalculatorButton("ln", ButtonType.SCIENTIFIC, Modifier.weight(1f)) { onAction("ln(") }
                             CalculatorButton("log", ButtonType.SCIENTIFIC, Modifier.weight(1f)) { onAction("log(") }
-                            CalculatorButton("√", ButtonType.SCIENTIFIC, Modifier.weight(1f)) { onAction("√(") }
+                            CalculatorButton("√", ButtonType.SCIENTIFIC, Modifier.weight(1f)) { onAction("sqrt(") }
                             CalculatorButton("^", ButtonType.SCIENTIFIC, Modifier.weight(1f)) { onAction("^") }
                         }
                         Row(modifier = Modifier.fillMaxWidth()) {
@@ -254,7 +263,8 @@ fun CalculatorScreen() {
             AppTab.GRAPHING -> GraphingScreen(secondaryTextColor, primaryTextColor)
             AppTab.HISTORY -> HistoryScreen(historyList, secondaryTextColor, primaryTextColor) { selectedExpr ->
                 expression = selectedExpr
-                result = engine.evaluate(selectedExpr)
+                val eval = engine.evaluate(selectedExpr)
+                result = if (eval != "Error") formatPrecision(eval) else eval
                 selectedTab = AppTab.CALCULATOR
             }
             AppTab.SETTINGS -> SettingsScreen(decimalPrecision, secondaryTextColor, primaryTextColor) { newPrec ->
@@ -294,11 +304,9 @@ fun GraphingScreen(secondaryTextColor: Color, primaryTextColor: Color) {
                 val centerY = height / 2
                 val scale = width / 20f
 
-                // Axes
                 drawLine(Color.Gray.copy(alpha = 0.5f), Offset(0f, centerY), Offset(width, centerY), strokeWidth = 2f)
                 drawLine(Color.Gray.copy(alpha = 0.5f), Offset(centerX, 0f), Offset(centerX, height), strokeWidth = 2f)
 
-                // Function Plot
                 val path = Path()
                 var firstPoint = true
 
