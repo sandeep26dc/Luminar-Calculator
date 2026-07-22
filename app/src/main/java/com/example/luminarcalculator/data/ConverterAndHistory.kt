@@ -1,5 +1,7 @@
 package com.example.luminarcalculator.data
 
+import net.objecthunter.exp4j.ExpressionBuilder
+
 data class HistoryItem(
     val expression: String,
     val result: String,
@@ -56,6 +58,64 @@ object UnitConverter {
             "Fahrenheit" -> (celsius * 9 / 5) + 32
             "Kelvin" -> celsius + 273.15
             else -> celsius
+        }
+    }
+
+    fun convertArea(value: Double, from: String, to: String): Double {
+        val sqMeters = when (from) {
+            "Sq Meters" -> value
+            "Sq Feet" -> value * 0.092903
+            "Acres" -> value * 4046.86
+            "Hectares" -> value * 10000.0
+            else -> value
+        }
+        return when (to) {
+            "Sq Meters" -> sqMeters
+            "Sq Feet" -> sqMeters / 0.092903
+            "Acres" -> sqMeters / 4046.86
+            "Hectares" -> sqMeters / 10000.0
+            else -> sqMeters
+        }
+    }
+
+    fun convertData(value: Double, from: String, to: String): Double {
+        val bytes = when (from) {
+            "Bytes" -> value
+            "KB" -> value * 1024.0
+            "MB" -> value * 1024.0 * 1024.0
+            "GB" -> value * 1024.0 * 1024.0 * 1024.0
+            else -> value
+        }
+        return when (to) {
+            "Bytes" -> bytes
+            "KB" -> bytes / 1024.0
+            "MB" -> bytes / (1024.0 * 1024.0)
+            "GB" -> bytes / (1024.0 * 1024.0 * 1024.0)
+            else -> bytes
+        }
+    }
+}
+
+object GraphEvaluator {
+    fun evaluatePoint(exprStr: String, xVal: Double): Double? {
+        return try {
+            val cleanExpr = exprStr
+                .replace("×", "*")
+                .replace("÷", "/")
+                .replace("sin", "sin")
+                .replace("cos", "cos")
+                .replace("tan", "tan")
+                .replace("sqrt", "sqrt")
+
+            val expr = ExpressionBuilder(cleanExpr)
+                .variable("x")
+                .build()
+                .setVariable("x", xVal)
+
+            val res = expr.evaluate()
+            if (res.isNaN() || res.isInfinite()) null else res
+        } catch (e: Exception) {
+            null
         }
     }
 }
