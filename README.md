@@ -1,39 +1,7 @@
 <div align="center">
 
-  <!-- Premium Electric Blue Animated Glow Header -->
-  <svg width="100%" height="80" viewBox="0 0 800 80" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Electric Blue Gradient -->
-      <linearGradient id="electricBlueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#00D2FF">
-          <animate attributeName="stop-color" values="#00D2FF; #00F0FF; #0088FF; #00D2FF" dur="6s" repeatCount="indefinite" />
-        </stop>
-        <stop offset="50%" stop-color="#00F0FF">
-          <animate attributeName="stop-color" values="#00F0FF; #0088FF; #00D2FF; #00F0FF" dur="6s" repeatCount="indefinite" />
-        </stop>
-        <stop offset="100%" stop-color="#0055FF">
-          <animate attributeName="stop-color" values="#0055FF; #00D2FF; #00F0FF; #0055FF" dur="6s" repeatCount="indefinite" />
-        </stop>
-      </linearGradient>
-
-      <!-- Neon Cyan Glow Filter -->
-      <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="3" result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-
-    <!-- Animated Title Text -->
-    <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" 
-          fill="url(#electricBlueGrad)" filter="url(#neonGlow)"
-          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" 
-          font-weight="900" font-size="38" letter-spacing="8">
-      LUMINAR CALCULATOR
-    </text>
-  </svg>
+  <!-- Electric Blue Animated Header via Capsule Render -->
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=00F0FF&height=200&section=header&text=LUMINAR%20CALCULATOR&fontSize=42&fontColor=000000&animation=twinkle&fontAlignY=38" width="100%" alt="Luminar Calculator Electric Blue Header" />
 
   <p><strong>Next-Gen Computational Engine & Scientific Telemetry Matrix</strong></p>
   <p><em>Architected & Developed by <strong>SANDEEP SOM</strong></em></p>
