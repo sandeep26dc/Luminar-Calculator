@@ -27,6 +27,36 @@ fun CalculatorScreen() {
     var result by remember { mutableStateOf("0") }
     val engine = remember { CalculatorEngine() }
 
+    fun onAction(value: String) {
+        when (value) {
+            "AC" -> {
+                expression = ""
+                result = "0"
+            }
+            "⌫" -> {
+                if (expression.isNotEmpty()) {
+                    expression = expression.drop(1)
+                    if (expression.isNotEmpty()) {
+                        val evalResult = engine.evaluate(expression)
+                        if (evalResult != "Error") result = evalResult
+                    } else {
+                        result = "0"
+                    }
+                }
+            }
+            "=" -> {
+                result = engine.evaluate(expression)
+            }
+            else -> {
+                expression += value
+                val evalResult = engine.evaluate(expression)
+                if (evalResult != "Error") {
+                    result = evalResult
+                }
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,69 +75,57 @@ fun CalculatorScreen() {
             Text(
                 text = expression,
                 color = secondaryTextColor,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Normal
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Normal,
+                maxLines = 2
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "= $result",
                 color = primaryTextColor,
-                fontSize = 42.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 46.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
             )
         }
 
         // --- KEYPAD GRID SECTION ---
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Row 1: Function Bar
             Row(modifier = Modifier.fillMaxWidth()) {
-                CalculatorButton("AC", ButtonType.FUNCTION, Modifier.weight(1f)) {
-                    expression = ""
-                    result = "0"
-                }
-                CalculatorButton("±", ButtonType.FUNCTION, Modifier.weight(1f)) {}
-                CalculatorButton("%", ButtonType.FUNCTION, Modifier.weight(1f)) {
-                    if (expression.isNotEmpty()) expression += "%"
-                }
-                CalculatorButton("÷", ButtonType.OPERATOR, Modifier.weight(1f)) {
-                    expression += "÷"
-                }
+                CalculatorButton("AC", ButtonType.FUNCTION, Modifier.weight(1f)) { onAction("AC") }
+                CalculatorButton("⌫", ButtonType.FUNCTION, Modifier.weight(1f)) { onAction("⌫") }
+                CalculatorButton("%", ButtonType.FUNCTION, Modifier.weight(1f)) { onAction("%") }
+                CalculatorButton("÷", ButtonType.OPERATOR, Modifier.weight(1f)) { onAction("÷") }
             }
 
-            // Row 2
             Row(modifier = Modifier.fillMaxWidth()) {
-                CalculatorButton("7", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "7"; result = engine.evaluate(expression) }
-                CalculatorButton("8", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "8"; result = engine.evaluate(expression) }
-                CalculatorButton("9", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "9"; result = engine.evaluate(expression) }
-                CalculatorButton("×", ButtonType.OPERATOR, Modifier.weight(1f)) { expression += "×" }
+                CalculatorButton("7", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("7") }
+                CalculatorButton("8", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("8") }
+                CalculatorButton("9", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("9") }
+                CalculatorButton("×", ButtonType.OPERATOR, Modifier.weight(1f)) { onAction("×") }
             }
 
-            // Row 3
             Row(modifier = Modifier.fillMaxWidth()) {
-                CalculatorButton("4", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "4"; result = engine.evaluate(expression) }
-                CalculatorButton("5", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "5"; result = engine.evaluate(expression) }
-                CalculatorButton("6", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "6"; result = engine.evaluate(expression) }
-                CalculatorButton("-", ButtonType.OPERATOR, Modifier.weight(1f)) { expression += "-" }
+                CalculatorButton("4", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("4") }
+                CalculatorButton("5", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("5") }
+                CalculatorButton("6", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("6") }
+                CalculatorButton("-", ButtonType.OPERATOR, Modifier.weight(1f)) { onAction("-") }
             }
 
-            // Row 4
             Row(modifier = Modifier.fillMaxWidth()) {
-                CalculatorButton("1", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "1"; result = engine.evaluate(expression) }
-                CalculatorButton("2", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "2"; result = engine.evaluate(expression) }
-                CalculatorButton("3", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "3"; result = engine.evaluate(expression) }
-                CalculatorButton("+", ButtonType.OPERATOR, Modifier.weight(1f)) { expression += "+" }
+                CalculatorButton("1", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("1") }
+                CalculatorButton("2", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("2") }
+                CalculatorButton("3", ButtonType.STANDARD, Modifier.weight(1f)) { onAction("3") }
+                CalculatorButton("+", ButtonType.OPERATOR, Modifier.weight(1f)) { onAction("+") }
             }
 
-            // Row 5
             Row(modifier = Modifier.fillMaxWidth()) {
-                CalculatorButton("0", ButtonType.STANDARD, Modifier.weight(2f)) { expression += "0"; result = engine.evaluate(expression) }
-                CalculatorButton(".", ButtonType.STANDARD, Modifier.weight(1f)) { expression += "." }
-                CalculatorButton("=", ButtonType.ACCENT, Modifier.weight(1f)) {
-                    result = engine.evaluate(expression)
-                }
+                CalculatorButton("0", ButtonType.STANDARD, Modifier.weight(2f)) { onAction("0") }
+                CalculatorButton(".", ButtonType.STANDARD, Modifier.weight(1f)) { onAction(".") }
+                CalculatorButton("=", ButtonType.ACCENT, Modifier.weight(1f)) { onAction("=") }
             }
         }
     }
