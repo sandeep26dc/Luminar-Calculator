@@ -23,7 +23,7 @@ object UnitConverter {
             "Kilometers" -> meters / 1000.0
             "Centimeters" -> meters * 100.0
             "Feet" -> meters / 0.3048
-            "Inches" -> meters / 0.0254
+            "Inches" -> meters * 0.0254
             else -> meters
         }
     }
@@ -102,10 +102,6 @@ object GraphEvaluator {
             val cleanExpr = exprStr
                 .replace("×", "*")
                 .replace("÷", "/")
-                .replace("sin", "sin")
-                .replace("cos", "cos")
-                .replace("tan", "tan")
-                .replace("sqrt", "sqrt")
 
             val expr = ExpressionBuilder(cleanExpr)
                 .variable("x")
