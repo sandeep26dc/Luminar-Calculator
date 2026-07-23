@@ -8,9 +8,10 @@ object CalculatorEngine {
     var isDegreeMode: Boolean = true
 
     fun evaluate(expression: String): String {
+        if (expression.isBlank()) return "0"
         return try {
-            val formattedExpr = prepareExpression(expression)
-            val expr = ExpressionBuilder(formattedExpr).build()
+            val sanitized = sanitizeExpression(expression)
+            val expr = ExpressionBuilder(sanitized).build()
             val evalResult = expr.evaluate()
 
             if (evalResult.isNaN() || evalResult.isInfinite()) {
@@ -23,11 +24,12 @@ object CalculatorEngine {
         }
     }
 
-    // Calculates Y value for a given X coordinate on the Graph Canvas
+    // Safe Canvas Evaluation for Graph Screen
     fun evaluateForGraph(expression: String, xVal: Double): Double? {
+        if (expression.isBlank()) return null
         return try {
-            val formattedExpr = prepareExpression(expression)
-            val expr = ExpressionBuilder(formattedExpr)
+            val sanitized = sanitizeExpression(expression)
+            val expr = ExpressionBuilder(sanitized)
                 .variable("x")
                 .build()
                 .setVariable("x", xVal)
@@ -39,7 +41,7 @@ object CalculatorEngine {
         }
     }
 
-    private fun prepareExpression(raw: String): String {
+    private fun sanitizeExpression(raw: String): String {
         var expr = raw
             .replace("×", "*")
             .replace("÷", "/")
@@ -47,14 +49,18 @@ object CalculatorEngine {
             .replace("π", "pi")
             .replace("e", "E")
 
-        // Handle implicit multiplication like 2x -> 2*x or 2sin -> 2*sin
-        expr = expr.replace(Regex("(\\d)([a-zA-Z(])"), "$1*$2")
+        // Auto-close missing brackets: e.g., "sin(45" -> "sin(45)"
+        val openCount = expr.count { it == '(' }
+        val closeCount = expr.count { it == ')' }
+        if (openCount > closeCount) {
+            expr += ")".repeat(openCount - closeCount)
+        }
 
-        // Degree vs Radian conversion for Trig functions
+        // Convert Degree inputs to Radians safely if Degree Mode is toggled
         if (isDegreeMode) {
-            expr = expr.replace(Regex("sin\\(([^)]+)\\)")) { "sin(($1)*pi/180)" }
-                .replace(Regex("cos\\(([^)]+)\\)")) { "cos(($1)*pi/180)" }
-                .replace(Regex("tan\\(([^)]+)\\)")) { "tan(($1)*pi/180)" }
+            expr = expr.replace(Regex("sin\\(([^)]+)\\)")) { "sin((${it.groupValues[1]})*pi/180)" }
+                .replace(Regex("cos\\(([^)]+)\\)")) { "cos((${it.groupValues[1]})*pi/180)" }
+                .replace(Regex("tan\\(([^)]+)\\)")) { "tan((${it.groupValues[1]})*pi/180)" }
         }
 
         return expr
