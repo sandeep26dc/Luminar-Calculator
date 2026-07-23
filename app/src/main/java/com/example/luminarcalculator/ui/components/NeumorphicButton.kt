@@ -34,7 +34,6 @@ fun NeumorphicButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Tactile haptic triggering on click
     val handleTouch = {
         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         onClick()
