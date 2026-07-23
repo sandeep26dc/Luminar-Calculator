@@ -1,41 +1,44 @@
 package com.example.luminarcalculator.ui
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.luminarcalculator.data.CalculatorEngine
 import com.example.luminarcalculator.ui.components.ButtonRole
 import com.example.luminarcalculator.ui.components.NeumorphicButton
 import com.example.luminarcalculator.ui.theme.*
 
 @Composable
 fun CalculatorScreen() {
-    var isDarkMode by remember { mutableStateOf(true) }
-    var expression by remember { mutableStateOf("6000/2:+3227:2") }
-    var result by remember { mutableStateOf("12,454") }
+    var isDarkMode by rememberSaveable { mutableStateOf(true) }
+    var currentTab by rememberSaveable { mutableIntStateOf(0) } // 0: Calc, 1: Graph
+    var expression by rememberSaveable { mutableStateOf("") }
+    var result by rememberSaveable { mutableStateOf("0") }
 
-    // Smooth background theme transition
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val animatedBgColor by animateColorAsState(
         targetValue = if (isDarkMode) DarkBackground else LightBackground,
-        animationSpec = tween(durationMillis = 300), label = "ThemeTransition"
+        animationSpec = tween(durationMillis = 300), label = "Theme"
     )
-
-    val textColorPrimary = if (isDarkMode) DarkTextPrimary else LightTextPrimary
-    val textColorSecondary = if (isDarkMode) DarkTextSecondary else LightTextSecondary
 
     Column(
         modifier = Modifier
@@ -43,122 +46,244 @@ fun CalculatorScreen() {
             .background(animatedBgColor)
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // --- 1. Top Theme Switcher & Display ---
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Light / Dark Mode Toggle Button
-            Box(
+        // --- Navigation Header ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Mode Switcher Tabs
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(if (isDarkMode) Color(0xFF14181F) else Color(0xFFD6E3F2))
+                    .padding(4.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(if (isDarkMode) Color(0xFF1A202C) else Color(0xFFD6E3F2))
-                        .clickable { isDarkMode = !isDarkMode }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = if (isDarkMode) "🌙  Dark Mode" else "☀️  Light Mode",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = textColorSecondary
-                    )
-                }
+                TabChip("Calc", currentTab == 0, isDarkMode) { currentTab = 0 }
+                TabChip("Graph", currentTab == 1, isDarkMode) { currentTab = 1 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Expression & Main Result
-            Column(
+            // Light / Dark Switch
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp),
-                horizontalAlignment = Alignment.End
+                    .clip(CircleShape)
+                    .background(if (isDarkMode) Color(0xFF14181F) else Color(0xFFD6E3F2))
+                    .clickable { isDarkMode = !isDarkMode }
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = expression,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = textColorSecondary,
-                    textAlign = TextAlign.End
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "=$result",
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColorPrimary,
-                    textAlign = TextAlign.End
+                    text = if (isDarkMode) "🌙" else "☀️",
+                    fontSize = 14.sp
                 )
             }
         }
 
-        // --- 2. Neumorphic Keypad Grid (Exact Match to Reference Image) ---
+        // --- Tab Body Selection ---
+        if (currentTab == 1) {
+            GraphScreen(isDarkMode = isDarkMode)
+        } else {
+            // Calculator Body (Portrait vs Landscape Layout)
+            if (isLandscape) {
+                LandscapeCalculatorLayout(
+                    isDarkMode = isDarkMode,
+                    expression = expression,
+                    result = result,
+                    onKeyClick = { key ->
+                        handleInput(key, expression, result, { expression = it }, { result = it })
+                    }
+                )
+            } else {
+                PortraitCalculatorLayout(
+                    isDarkMode = isDarkMode,
+                    expression = expression,
+                    result = result,
+                    onKeyClick = { key ->
+                        handleInput(key, expression, result, { expression = it }, { result = it })
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabChip(label: String, isSelected: Boolean, isDarkMode: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (isSelected) (if (isDarkMode) DarkKeyAccent else LightKeyAccent)
+                else Color.Transparent
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) Color.White else (if (isDarkMode) DarkTextSecondary else LightTextSecondary)
+        )
+    }
+}
+
+private fun handleInput(
+    key: String,
+    currentExpr: String,
+    currentRes: String,
+    setExpr: (String) -> Unit,
+    setRes: (String) -> Unit
+) {
+    when (key) {
+        "Ac", "AC" -> {
+            setExpr("")
+            setRes("0")
+        }
+        "=" -> {
+            if (currentExpr.isNotEmpty()) {
+                val eval = CalculatorEngine.evaluate(currentExpr)
+                setRes(eval)
+            }
+        }
+        "deg", "rad" -> {
+            CalculatorEngine.isDegreeMode = !CalculatorEngine.isDegreeMode
+        }
+        else -> {
+            setExpr(currentExpr + key)
+        }
+    }
+}
+
+@Composable
+private fun PortraitCalculatorLayout(
+    isDarkMode: Boolean,
+    expression: String,
+    result: String,
+    onKeyClick: (String) -> Unit
+) {
+    val textColorPrimary = if (isDarkMode) DarkTextPrimary else LightTextPrimary
+    val textColorSecondary = if (isDarkMode) DarkTextSecondary else LightTextSecondary
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+                .weight(1f),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.End
         ) {
-            // Row 1: Scientific Top Utility Row
-            Row(modifier = Modifier.fillMaxWidth()) {
-                NeumorphicButton("sc", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("sin", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("deg", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("%", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) {}
-            }
+            Text(text = expression, fontSize = 24.sp, color = textColorSecondary, textAlign = TextAlign.End)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "=$result", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = textColorPrimary, textAlign = TextAlign.End)
+        }
 
-            // Row 2
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                NeumorphicButton("Ac", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) {
-                    expression = ""
-                    result = "0"
-                }
-                NeumorphicButton("8", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("9", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("÷", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) {}
+                NeumorphicButton("sin", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("sin(") }
+                NeumorphicButton("cos", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("cos(") }
+                NeumorphicButton("deg", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("deg") }
+                NeumorphicButton("%", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("%") }
             }
-
-            // Row 3
             Row(modifier = Modifier.fillMaxWidth()) {
-                NeumorphicButton("4", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("5", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("6", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                NeumorphicButton("×", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) {}
+                NeumorphicButton("Ac", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("Ac") }
+                NeumorphicButton("8", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("8") }
+                NeumorphicButton("9", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("9") }
+                NeumorphicButton("÷", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("÷") }
             }
-
-            // Row 4 & 5 Combined with Tall Accent Equals Key
             Row(modifier = Modifier.fillMaxWidth()) {
-                // Left 3 columns
+                NeumorphicButton("4", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("4") }
+                NeumorphicButton("5", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("5") }
+                NeumorphicButton("6", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("6") }
+                NeumorphicButton("×", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("×") }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(3f)) {
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        NeumorphicButton("1", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                        NeumorphicButton("2", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                        NeumorphicButton("3", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
+                        NeumorphicButton("1", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("1") }
+                        NeumorphicButton("2", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("2") }
+                        NeumorphicButton("3", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("3") }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        NeumorphicButton("0", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                        NeumorphicButton("•", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) {}
-                        NeumorphicButton("+", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) {}
+                        NeumorphicButton("0", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("0") }
+                        NeumorphicButton("•", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("•") }
+                        NeumorphicButton("+", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("+") }
                     }
                 }
-
-                // Right column: Tall Electric Blue Equals Button
                 Column(modifier = Modifier.weight(1f)) {
-                    NeumorphicButton(
-                        symbol = "=",
-                        role = ButtonRole.ACCENT_EQUALS,
-                        isDarkMode = isDarkMode,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(138.dp) // Spans two row heights perfectly
-                    ) {}
+                    NeumorphicButton("=", ButtonRole.ACCENT_EQUALS, isDarkMode, modifier = Modifier.fillMaxWidth().height(138.dp)) { onKeyClick("=") }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LandscapeCalculatorLayout(
+    isDarkMode: Boolean,
+    expression: String,
+    result: String,
+    onKeyClick: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp)
+    ) {
+        // Display Section
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(text = expression, fontSize = 20.sp, color = if (isDarkMode) DarkTextSecondary else LightTextSecondary)
+            Text(text = "=$result", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = if (isDarkMode) DarkTextPrimary else LightTextPrimary)
+        }
+
+        // Expanded Landscape Grid (Matches Apple Landscape Mode)
+        Column(
+            modifier = Modifier
+                .weight(2f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                NeumorphicButton("sin", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("sin(") }
+                NeumorphicButton("cos", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("cos(") }
+                NeumorphicButton("tan", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("tan(") }
+                NeumorphicButton("log", ButtonRole.TOP_ROW, isDarkMode, Modifier.weight(1f)) { onKeyClick("log(") }
+                NeumorphicButton("Ac", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("Ac") }
+                NeumorphicButton("÷", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("÷") }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                NeumorphicButton("7", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("7") }
+                NeumorphicButton("8", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("8") }
+                NeumorphicButton("9", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("9") }
+                NeumorphicButton("×", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("×") }
+                NeumorphicButton("-", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("-") }
+                NeumorphicButton("+", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("+") }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                NeumorphicButton("4", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("4") }
+                NeumorphicButton("5", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("5") }
+                NeumorphicButton("6", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("6") }
+                NeumorphicButton("1", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("1") }
+                NeumorphicButton("2", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("2") }
+                NeumorphicButton("3", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("3") }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                NeumorphicButton("0", ButtonRole.NUMBER, isDarkMode, Modifier.weight(2f)) { onKeyClick("0") }
+                NeumorphicButton("•", ButtonRole.NUMBER, isDarkMode, Modifier.weight(1f)) { onKeyClick("•") }
+                NeumorphicButton("=", ButtonRole.ACCENT_EQUALS, isDarkMode, Modifier.weight(3f)) { onKeyClick("=") }
             }
         }
     }
