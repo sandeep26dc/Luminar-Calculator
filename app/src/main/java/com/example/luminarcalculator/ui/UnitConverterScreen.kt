@@ -18,7 +18,7 @@ import com.example.luminarcalculator.ui.theme.*
 @Composable
 fun UnitConverterScreen(isDarkMode: Boolean) {
     var inputText by remember { mutableStateOf("1") }
-    var selectedCategory by remember { mutableIntStateOf(0) } // 0: Length, 1: Weight, 2: Temp
+    var selectedCategory by remember { mutableIntStateOf(0) }
 
     val categories = listOf("Length", "Weight", "Temp")
     val inputVal = inputText.toDoubleOrNull() ?: 0.0
@@ -32,7 +32,6 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Category Selector
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -57,7 +56,6 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
             }
         }
 
-        // Input Box
         OutlinedTextField(
             value = inputText,
             onValueChange = { inputText = it },
@@ -74,20 +72,19 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Conversion Displays
         when (selectedCategory) {
-            0 -> { // Length: Meters to Feet / Km / Miles
+            0 -> {
                 ConversionCard("Meters (m)", "$inputVal", isDarkMode)
                 ConversionCard("Feet (ft)", String.format("%.3f", inputVal * 3.28084), isDarkMode)
                 ConversionCard("Kilometers (km)", String.format("%.4f", inputVal / 1000.0), isDarkMode)
                 ConversionCard("Miles (mi)", String.format("%.4f", inputVal / 1609.34), isDarkMode)
             }
-            1 -> { // Weight: Kg to Lbs / Grams
+            1 -> {
                 ConversionCard("Kilograms (kg)", "$inputVal", isDarkMode)
                 ConversionCard("Pounds (lbs)", String.format("%.3f", inputVal * 2.20462), isDarkMode)
                 ConversionCard("Grams (g)", String.format("%.2f", inputVal * 1000.0), isDarkMode)
             }
-            2 -> { // Temp: Celsius to Fahrenheit / Kelvin
+            2 -> {
                 ConversionCard("Celsius (°C)", "$inputVal", isDarkMode)
                 ConversionCard("Fahrenheit (°F)", String.format("%.2f", (inputVal * 9/5) + 32), isDarkMode)
                 ConversionCard("Kelvin (K)", String.format("%.2f", inputVal + 273.15), isDarkMode)
