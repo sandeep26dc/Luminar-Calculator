@@ -26,7 +26,7 @@ fun GraphScreen(isDarkMode: Boolean) {
     var functionInput by rememberSaveable { mutableStateOf("sin(x)") }
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
-    var scale by remember { mutableFloatStateOf(40f) } // Pixels per math unit
+    var scale by remember { mutableFloatStateOf(50f) }
 
     val bgColor = if (isDarkMode) DarkBackground else LightBackground
     val gridColor = if (isDarkMode) Color(0x22FFFFFF) else Color(0x22000000)
@@ -40,11 +40,10 @@ fun GraphScreen(isDarkMode: Boolean) {
             .statusBarsPadding()
             .padding(16.dp)
     ) {
-        // Function Input Field
         OutlinedTextField(
             value = functionInput,
             onValueChange = { functionInput = it },
-            label = { Text("f(x) Function", color = if (isDarkMode) DarkTextSecondary else LightTextSecondary) },
+            label = { Text("Plot f(x)", color = if (isDarkMode) DarkTextSecondary else LightTextSecondary) },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = lineCurveColor,
@@ -56,7 +55,6 @@ fun GraphScreen(isDarkMode: Boolean) {
                 .padding(bottom = 12.dp)
         )
 
-        // Interactive Graph Canvas (Pan & Pinch Zoom Supported)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -64,7 +62,7 @@ fun GraphScreen(isDarkMode: Boolean) {
                 .background(if (isDarkMode) Color(0xFF0B0E14) else Color(0xFFF0F5FA))
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoom, _ ->
-                        scale = (scale * zoom).coerceIn(10f, 200f)
+                        scale = (scale * zoom).coerceIn(10f, 300f)
                         offsetX += pan.x
                         offsetY += pan.y
                     }
@@ -76,7 +74,7 @@ fun GraphScreen(isDarkMode: Boolean) {
                 val centerX = width / 2f + offsetX
                 val centerY = height / 2f + offsetY
 
-                // 1. Draw Grid Lines
+                // Grid Lines
                 var x = centerX % scale
                 while (x < width) {
                     drawLine(gridColor, Offset(x, 0f), Offset(x, height), strokeWidth = 1f)
@@ -88,11 +86,11 @@ fun GraphScreen(isDarkMode: Boolean) {
                     y += scale
                 }
 
-                // 2. Draw Axes
+                // Coordinate Axes
                 drawLine(axisColor, Offset(0f, centerY), Offset(width, centerY), strokeWidth = 2f)
                 drawLine(axisColor, Offset(centerX, 0f), Offset(centerX, height), strokeWidth = 2f)
 
-                // 3. Plot Mathematical Curve
+                // Render Math Path
                 val path = Path()
                 var isFirstPoint = true
 
@@ -125,12 +123,12 @@ fun GraphScreen(isDarkMode: Boolean) {
             }
 
             Text(
-                text = "Pinch to zoom • Drag to pan",
-                fontSize = 12.sp,
+                text = "Pinch to Zoom • Drag to Move",
+                fontSize = 11.sp,
                 color = if (isDarkMode) Color(0x66FFFFFF) else Color(0x66000000),
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(16.dp)
+                    .padding(12.dp)
             )
         }
     }
