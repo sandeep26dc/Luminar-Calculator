@@ -2,24 +2,20 @@ package com.example.luminarcalculator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// --- DARK NEUMORPHIC PALETTE ---
-val DarkBackground = Color(0xFF101419)
-val DarkKeyNumber = Color(0xFF1B2028)
-val DarkKeyTopRow = Color(0xFF14181F)
-val DarkKeyOperator = Color(0xFF1A222D)
-val DarkKeyAccent = Color(0xFF0084FF)
+// Light Theme Colors
+val LightBackground = Color(0xFFE3EDF7)
+val LightKeyNum = Color(0xFFE3EDF7)
+val LightKeyOp = Color(0xFFD0DFEE)
+val LightKeyTop = Color(0xFFD0DFEE)
+val LightKeyAccent = Color(0xFF00E5FF)
+val LightTextPrimary = Color(0xFF1E293B)
+val LightTextSecondary = Color(0xFF64748B)
 
+// Dark Theme Colors
+val DarkBackground = Color(0xFF0D1117)
+val DarkKeyNum = Color(0xFF14181F)
+val DarkKeyOp = Color(0xFF1C222D)
+val DarkKeyTop = Color(0xFF1C222D)
+val DarkKeyAccent = Color(0xFF00E5FF)
 val DarkTextPrimary = Color(0xFFFFFFFF)
-val DarkTextSecondary = Color(0x99FFFFFF)
-val DarkTextOperator = Color(0xFF00A2FF)
-
-// --- LIGHT NEUMORPHIC PALETTE ---
-val LightBackground = Color(0xFFE4EDF7)
-val LightKeyNumber = Color(0xFFEEF5FD)
-val LightKeyTopRow = Color(0xFFD6E3F2)
-val LightKeyOperator = Color(0xFFD8E5F5)
-val LightKeyAccent = Color(0xFF0084FF)
-
-val LightTextPrimary = Color(0xFF1C2530)
-val LightTextSecondary = Color(0x991C2530)
-val LightTextOperator = Color(0xFF0077FF)
+val DarkTextSecondary = Color(0xFF94A3B8)
