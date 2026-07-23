@@ -2,15 +2,24 @@ package com.example.luminarcalculator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Obsidian & Cyber Cyan Palette
-val ObsidianBg = Color(0xFF070A0F)
-val SurfaceGlassTop = Color(0xFF131B26)
-val SurfaceGlassBottom = Color(0xFF090D14)
+// --- DARK NEUMORPHIC PALETTE ---
+val DarkBackground = Color(0xFF101419)
+val DarkKeyNumber = Color(0xFF1B2028)
+val DarkKeyTopRow = Color(0xFF14181F)
+val DarkKeyOperator = Color(0xFF1A222D)
+val DarkKeyAccent = Color(0xFF0084FF)
 
-val NeonCyan = Color(0xFF00E5FF)
-val ElectricBlue = Color(0xFF0088FF)
-val NeonEmerald = Color(0xFF00FF9D)
+val DarkTextPrimary = Color(0xFFFFFFFF)
+val DarkTextSecondary = Color(0x99FFFFFF)
+val DarkTextOperator = Color(0xFF00A2FF)
 
-val TextPrimary = Color(0xFFFFFFFF)
-val TextSecondary = Color(0x80FFFFFF)
-val GlassBorder = Color(0x3300E5FF)
+// --- LIGHT NEUMORPHIC PALETTE ---
+val LightBackground = Color(0xFFE4EDF7)
+val LightKeyNumber = Color(0xFFEEF5FD)
+val LightKeyTopRow = Color(0xFFD6E3F2)
+val LightKeyOperator = Color(0xFFD8E5F5)
+val LightKeyAccent = Color(0xFF0084FF)
+
+val LightTextPrimary = Color(0xFF1C2530)
+val LightTextSecondary = Color(0x991C2530)
+val LightTextOperator = Color(0xFF0077FF)
