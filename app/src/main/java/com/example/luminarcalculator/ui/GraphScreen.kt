@@ -48,7 +48,8 @@ fun GraphScreen(isDarkMode: Boolean) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = lineCurveColor,
                 unfocusedBorderColor = gridColor,
-                focusedTextColor = if (isDarkMode) DarkTextPrimary else LightTextPrimary
+                focusedTextColor = if (isDarkMode) DarkTextPrimary else LightTextPrimary,
+                unfocusedTextColor = if (isDarkMode) DarkTextPrimary else LightTextPrimary
             ),
             modifier = Modifier
                 .fillMaxWidth()
