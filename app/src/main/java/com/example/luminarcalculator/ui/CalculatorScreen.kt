@@ -28,7 +28,7 @@ import com.example.luminarcalculator.ui.theme.*
 @Composable
 fun CalculatorScreen() {
     var isDarkMode by rememberSaveable { mutableStateOf(true) }
-    var currentTab by rememberSaveable { mutableIntStateOf(0) } // 0: Calc, 1: Graph
+    var currentTab by rememberSaveable { mutableIntStateOf(0) }
     var expression by rememberSaveable { mutableStateOf("") }
     var result by rememberSaveable { mutableStateOf("0") }
 
@@ -47,7 +47,6 @@ fun CalculatorScreen() {
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        // --- Navigation Header ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -55,7 +54,6 @@ fun CalculatorScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Mode Switcher Tabs
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
@@ -66,7 +64,6 @@ fun CalculatorScreen() {
                 TabChip("Graph", currentTab == 1, isDarkMode) { currentTab = 1 }
             }
 
-            // Light / Dark Switch
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
@@ -74,18 +71,13 @@ fun CalculatorScreen() {
                     .clickable { isDarkMode = !isDarkMode }
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
-                Text(
-                    text = if (isDarkMode) "🌙" else "☀️",
-                    fontSize = 14.sp
-                )
+                Text(text = if (isDarkMode) "🌙" else "☀️", fontSize = 14.sp)
             }
         }
 
-        // --- Tab Body Selection ---
         if (currentTab == 1) {
             GraphScreen(isDarkMode = isDarkMode)
         } else {
-            // Calculator Body (Portrait vs Landscape Layout)
             if (isLandscape) {
                 LandscapeCalculatorLayout(
                     isDarkMode = isDarkMode,
@@ -237,7 +229,6 @@ private fun LandscapeCalculatorLayout(
             .fillMaxSize()
             .padding(12.dp)
     ) {
-        // Display Section
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -249,7 +240,6 @@ private fun LandscapeCalculatorLayout(
             Text(text = "=$result", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = if (isDarkMode) DarkTextPrimary else LightTextPrimary)
         }
 
-        // Expanded Landscape Grid (Matches Apple Landscape Mode)
         Column(
             modifier = Modifier
                 .weight(2f)
