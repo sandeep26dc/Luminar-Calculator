@@ -1,14 +1,13 @@
 package com.example.luminarcalculator.data
 
 import net.objecthunter.exp4j.ExpressionBuilder
-import kotlin.math.*
 
 object CalculatorEngine {
 
     var isDegreeMode: Boolean = true
 
     fun evaluate(expression: String): String {
-        if (expression.isBlank()) return "0"
+        if (expression.isBlank()) return ""
         return try {
             val sanitized = sanitizeExpression(expression)
             val expr = ExpressionBuilder(sanitized).build()
@@ -24,7 +23,20 @@ object CalculatorEngine {
         }
     }
 
-    // Safe Canvas Evaluation for Graph Screen
+    // Live Evaluation (returns empty on incomplete syntax so UI doesn't show errors while typing)
+    fun evaluateLive(expression: String): String {
+        if (expression.isBlank()) return ""
+        return try {
+            val sanitized = sanitizeExpression(expression)
+            val expr = ExpressionBuilder(sanitized).build()
+            val evalResult = expr.evaluate()
+
+            if (evalResult.isNaN() || evalResult.isInfinite()) "" else formatResult(evalResult)
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
     fun evaluateForGraph(expression: String, xVal: Double): Double? {
         if (expression.isBlank()) return null
         return try {
@@ -49,14 +61,12 @@ object CalculatorEngine {
             .replace("π", "pi")
             .replace("e", "E")
 
-        // Auto-close missing brackets: e.g., "sin(45" -> "sin(45)"
         val openCount = expr.count { it == '(' }
         val closeCount = expr.count { it == ')' }
         if (openCount > closeCount) {
             expr += ")".repeat(openCount - closeCount)
         }
 
-        // Convert Degree inputs to Radians safely if Degree Mode is toggled
         if (isDegreeMode) {
             expr = expr.replace(Regex("sin\\(([^)]+)\\)")) { "sin((${it.groupValues[1]})*pi/180)" }
                 .replace(Regex("cos\\(([^)]+)\\)")) { "cos((${it.groupValues[1]})*pi/180)" }
