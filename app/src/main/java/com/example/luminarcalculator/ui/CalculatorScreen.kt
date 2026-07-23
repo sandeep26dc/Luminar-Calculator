@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -37,15 +38,15 @@ data class HistoryItem(val expression: String, val result: String)
 @Composable
 fun CalculatorScreen() {
     var isDarkMode by rememberSaveable { mutableStateOf(true) }
-    var currentTab by rememberSaveable { mutableIntStateOf(0) } // 0: Calc, 1: Graph
+    var currentTab by rememberSaveable { mutableIntStateOf(0) } // 0: Calc, 1: Graph, 2: Convert
     var expression by rememberSaveable { mutableStateOf("") }
     var result by rememberSaveable { mutableStateOf("0") }
     var livePreview by rememberSaveable { mutableStateOf("") }
     var isScientificExpanded by rememberSaveable { mutableStateOf(false) }
     var showHistorySheet by rememberSaveable { mutableStateOf(false) }
+    var showInfoSheet by rememberSaveable { mutableStateOf(false) }
 
     val historyList = remember { mutableStateListOf<HistoryItem>() }
-
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
@@ -65,20 +66,30 @@ fun CalculatorScreen() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // History Icon Button
-            IconButton(onClick = { showHistorySheet = true }) {
-                Icon(
-                    imageVector = Icons.Default.History,
-                    contentDescription = "History",
-                    tint = if (isDarkMode) DarkTextPrimary else LightTextPrimary
-                )
+            // Left Action Icons (History & Info Modal)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { showHistorySheet = true }) {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = "History",
+                        tint = if (isDarkMode) DarkTextPrimary else LightTextPrimary
+                    )
+                }
+                
+                IconButton(onClick = { showInfoSheet = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "App Details",
+                        tint = Color(0xFF00E5FF)
+                    )
+                }
             }
 
-            // Tabs Switcher
+            // Central Navigation Tabs Switcher
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
@@ -87,6 +98,7 @@ fun CalculatorScreen() {
             ) {
                 TabChip("Calc", currentTab == 0, isDarkMode) { currentTab = 0 }
                 TabChip("Graph", currentTab == 1, isDarkMode) { currentTab = 1 }
+                TabChip("Convert", currentTab == 2, isDarkMode) { currentTab = 2 }
             }
 
             // Theme Toggle Button
@@ -95,37 +107,95 @@ fun CalculatorScreen() {
                     .clip(CircleShape)
                     .background(if (isDarkMode) Color(0xFF14181F) else Color(0xFFD6E3F2))
                     .clickable { isDarkMode = !isDarkMode }
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
                 Text(text = if (isDarkMode) "🌙" else "☀️", fontSize = 14.sp)
             }
         }
 
-        if (currentTab == 1) {
-            GraphScreen(isDarkMode = isDarkMode)
-        } else {
-            if (isLandscape) {
-                LandscapeCalculatorLayout(
-                    isDarkMode = isDarkMode,
-                    expression = expression,
-                    result = result,
-                    livePreview = livePreview,
-                    onKeyClick = { key ->
-                        handleInput(key, expression, result, { expression = it }, { result = it }, { livePreview = it }, historyList)
-                    }
+        // --- Screen Views ---
+        when (currentTab) {
+            1 -> GraphScreen(isDarkMode = isDarkMode)
+            2 -> UnitConverterScreen(isDarkMode = isDarkMode)
+            else -> {
+                if (isLandscape) {
+                    LandscapeCalculatorLayout(
+                        isDarkMode = isDarkMode,
+                        expression = expression,
+                        result = result,
+                        livePreview = livePreview,
+                        onKeyClick = { key ->
+                            handleInput(key, expression, result, { expression = it }, { result = it }, { livePreview = it }, historyList)
+                        }
+                    )
+                } else {
+                    PortraitCalculatorLayout(
+                        isDarkMode = isDarkMode,
+                        expression = expression,
+                        result = result,
+                        livePreview = livePreview,
+                        isScientificExpanded = isScientificExpanded,
+                        onToggleScientific = { isScientificExpanded = !isScientificExpanded },
+                        onKeyClick = { key ->
+                            handleInput(key, expression, result, { expression = it }, { result = it }, { livePreview = it }, historyList)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    // --- App Info Modal (Floating "i" Details Sheet) ---
+    if (showInfoSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showInfoSheet = false },
+            containerColor = if (isDarkMode) Color(0xFF14181F) else Color(0xFFE3EDF7)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "LUMINAR CALCULATOR",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF00E5FF)
                 )
-            } else {
-                PortraitCalculatorLayout(
-                    isDarkMode = isDarkMode,
-                    expression = expression,
-                    result = result,
-                    livePreview = livePreview,
-                    isScientificExpanded = isScientificExpanded,
-                    onToggleScientific = { isScientificExpanded = !isScientificExpanded },
-                    onKeyClick = { key ->
-                        handleInput(key, expression, result, { expression = it }, { result = it }, { livePreview = it }, historyList)
-                    }
+                Text(
+                    text = "Version 1.0.0 (Enterprise Suite)",
+                    fontSize = 12.sp,
+                    color = if (isDarkMode) DarkTextSecondary else LightTextSecondary,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
+
+                Divider(color = (if (isDarkMode) DarkTextSecondary else LightTextSecondary).copy(alpha = 0.2f))
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Creator & Lead Engineer",
+                    fontSize = 13.sp,
+                    color = if (isDarkMode) DarkTextSecondary else LightTextSecondary
+                )
+                Text(
+                    text = "Sandeep Som",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isDarkMode) DarkTextPrimary else LightTextPrimary,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Text(
+                    text = "Engineered with Jetpack Compose & Neumorphic Physics engine. Built for real-time mathematical operations, interactive function graphing, and high-precision calculations.",
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    color = if (isDarkMode) DarkTextSecondary else LightTextSecondary,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -196,7 +266,7 @@ private fun TabChip(label: String, isSelected: Boolean, isDarkMode: Boolean, onC
                 else Color.Transparent
             )
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = label,
@@ -214,7 +284,7 @@ private fun handleInput(
     setExpr: (String) -> Unit,
     setRes: (String) -> Unit,
     setLivePreview: (String) -> Unit,
-    historyList: SnapshotStateList<HistoryItem>
+    historyList: androidx.compose.runtime.snapshots.SnapshotStateList<HistoryItem>
 ) {
     when (key) {
         "Ac", "AC" -> {
@@ -270,7 +340,6 @@ private fun PortraitCalculatorLayout(
             .padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // --- Display Area ---
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -279,8 +348,6 @@ private fun PortraitCalculatorLayout(
             horizontalAlignment = Alignment.End
         ) {
             Text(text = expression, fontSize = 28.sp, color = textColorSecondary, textAlign = TextAlign.End)
-            
-            // Live Preview Result (Google Calc style)
             if (livePreview.isNotEmpty() && livePreview != result) {
                 Text(
                     text = livePreview,
@@ -290,12 +357,10 @@ private fun PortraitCalculatorLayout(
                     textAlign = TextAlign.End
                 )
             }
-            
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "=$result", fontSize = 46.sp, fontWeight = FontWeight.Bold, color = textColorPrimary, textAlign = TextAlign.End)
         }
 
-        // --- Scientific Toggle Handle ---
         IconButton(
             onClick = onToggleScientific,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -307,9 +372,7 @@ private fun PortraitCalculatorLayout(
             )
         }
 
-        // --- Keypad Section ---
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            // Animated Scientific Row (Collapsible)
             AnimatedVisibility(
                 visible = isScientificExpanded,
                 enter = expandVertically() + fadeIn(),
@@ -331,7 +394,6 @@ private fun PortraitCalculatorLayout(
                 }
             }
 
-            // Main Standard Keypad
             Row(modifier = Modifier.fillMaxWidth()) {
                 NeumorphicButton("Ac", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("Ac") }
                 NeumorphicButton("( )", ButtonRole.OPERATOR, isDarkMode, Modifier.weight(1f)) { onKeyClick("(") }
