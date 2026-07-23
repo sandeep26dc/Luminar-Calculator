@@ -1,7 +1,9 @@
 package com.example.luminarcalculator.ui
 
 import android.content.res.Configuration
+import android.os.Build
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -55,10 +58,23 @@ fun CalculatorScreen() {
         animationSpec = tween(durationMillis = 300), label = "Theme"
     )
 
+    // Zen Blur Controller
+    val isSheetOpen = showHistorySheet || showInfoSheet
+    val backgroundBlurRadius by animateDpAsState(
+        targetValue = if (isSheetOpen) 16.dp else 0.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "ZenBlur"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(animatedBgColor)
+            .then(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && backgroundBlurRadius > 0.dp) {
+                    Modifier.blur(backgroundBlurRadius)
+                } else Modifier
+            )
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
@@ -70,7 +86,6 @@ fun CalculatorScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left Action Icons (History & Info Modal)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { showHistorySheet = true }) {
                     Icon(
@@ -89,7 +104,6 @@ fun CalculatorScreen() {
                 }
             }
 
-            // Central Navigation Tabs Switcher
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
@@ -101,7 +115,6 @@ fun CalculatorScreen() {
                 TabChip("Convert", currentTab == 2, isDarkMode) { currentTab = 2 }
             }
 
-            // Theme Toggle Button
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
@@ -145,7 +158,7 @@ fun CalculatorScreen() {
         }
     }
 
-    // --- App Info Modal (Floating "i" Details Sheet) ---
+    // --- App Info Modal ---
     if (showInfoSheet) {
         ModalBottomSheet(
             onDismissRequest = { showInfoSheet = false },
@@ -170,7 +183,7 @@ fun CalculatorScreen() {
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                Divider(color = (if (isDarkMode) DarkTextSecondary else LightTextSecondary).copy(alpha = 0.2f))
+                HorizontalDivider(color = (if (isDarkMode) DarkTextSecondary else LightTextSecondary).copy(alpha = 0.2f))
 
                 Spacer(modifier = Modifier.height(16.dp))
 
