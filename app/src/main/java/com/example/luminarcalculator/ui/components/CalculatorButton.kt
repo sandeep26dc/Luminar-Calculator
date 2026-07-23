@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,47 +16,52 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.luminarcalculator.ui.theme.*
 
-enum class LuminarButtonType {
-    NUMBER,      // Dark Glass with Subtle Border
-    OPERATOR,    // Glowing Cyan Gradient
-    ACTION,      // Neon Green Text / Dark Background
-    EQUALS       // Glowing Neon Emerald Action
-}
+enum class ButtonRole { NUMBER, TOP_ROW, OPERATOR, ACCENT_EQUALS }
 
 @Composable
-fun LuminarButton(
+fun NeumorphicButton(
     symbol: String,
-    type: LuminarButtonType,
+    role: ButtonRole,
+    isDarkMode: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    // Cyber-Lux Color Palette
-    val bgGradient = when (type) {
-        LuminarButtonType.NUMBER -> listOf(Color(0xFF161C26), Color(0xFF0F141C))
-        LuminarButtonType.OPERATOR -> listOf(Color(0xFF00E5FF), Color(0xFF0088FF))
-        LuminarButtonType.ACTION -> listOf(Color(0xFF2A3447), Color(0xFF1E2636))
-        LuminarButtonType.EQUALS -> listOf(Color(0xFF00FF9D), Color(0xFF00B36B))
+    val cornerShape = RoundedCornerShape(20.dp)
+
+    // Dynamic color assignment based on Theme & Role
+    val (bgColor, textColor, glowShadow) = when (role) {
+        ButtonRole.NUMBER -> if (isDarkMode) {
+            Triple(DarkKeyNumber, DarkTextPrimary, Color(0x40000000))
+        } else {
+            Triple(LightKeyNumber, LightTextPrimary, Color(0x2094A8C0))
+        }
+
+        ButtonRole.TOP_ROW -> if (isDarkMode) {
+            Triple(DarkKeyTopRow, DarkTextSecondary, Color(0x30000000))
+        } else {
+            Triple(LightKeyTopRow, LightTextSecondary, Color(0x1594A8C0))
+        }
+
+        ButtonRole.OPERATOR -> if (isDarkMode) {
+            Triple(DarkKeyOperator, DarkTextOperator, Color(0x40000000))
+        } else {
+            Triple(LightKeyOperator, LightTextOperator, Color(0x2094A8C0))
+        }
+
+        ButtonRole.ACCENT_EQUALS -> {
+            Triple(DarkKeyAccent, Color.White, Color(0x660084FF))
+        }
     }
 
-    val textColor = when (type) {
-        LuminarButtonType.NUMBER -> Color.White
-        LuminarButtonType.OPERATOR -> Color.Black
-        LuminarButtonType.ACTION -> Color(0xFF00FF9D)
-        LuminarButtonType.EQUALS -> Color.Black
-    }
-
-    val borderColor = when (type) {
-        LuminarButtonType.NUMBER -> Color(0x33FFFFFF)
-        LuminarButtonType.OPERATOR -> Color(0x8000E5FF)
-        LuminarButtonType.ACTION -> Color(0x4000FF9D)
-        LuminarButtonType.EQUALS -> Color(0x8000FF9D)
-    }
-
-    val glowColor = when (type) {
-        LuminarButtonType.OPERATOR -> Color(0x4000E5FF)
-        LuminarButtonType.EQUALS -> Color(0x6600FF9D)
-        else -> Color.Transparent
+    // Top border bevel simulating overhead light
+    val borderBrush = if (role == ButtonRole.ACCENT_EQUALS) {
+        Brush.verticalGradient(listOf(Color(0x80FFFFFF), Color.Transparent))
+    } else if (isDarkMode) {
+        Brush.verticalGradient(listOf(Color(0x22FFFFFF), Color(0x05FFFFFF)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xFFFFFFFF), Color(0x10FFFFFF)))
     }
 
     Box(
@@ -64,24 +69,20 @@ fun LuminarButton(
         modifier = modifier
             .padding(5.dp)
             .shadow(
-                elevation = if (type == LuminarButtonType.OPERATOR || type == LuminarButtonType.EQUALS) 10.dp else 2.dp,
-                shape = CircleShape,
-                spotColor = glowColor,
-                ambientColor = glowColor
+                elevation = if (role == ButtonRole.ACCENT_EQUALS) 8.dp else 4.dp,
+                shape = cornerShape,
+                ambientColor = glowShadow,
+                spotColor = glowShadow
             )
-            .clip(CircleShape)
-            .background(brush = Brush.verticalGradient(bgGradient))
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(listOf(borderColor, Color.Transparent)),
-                shape = CircleShape
-            )
+            .clip(cornerShape)
+            .background(bgColor)
+            .border(width = 1.dp, brush = borderBrush, shape = cornerShape)
             .clickable { onClick() }
     ) {
         Text(
             text = symbol,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = if (role == ButtonRole.TOP_ROW) 16.sp else 22.sp,
+            fontWeight = FontWeight.SemiBold,
             color = textColor
         )
     }
