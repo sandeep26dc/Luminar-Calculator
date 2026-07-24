@@ -26,6 +26,7 @@ import com.example.luminarcalculator.ui.CalculatorScreen
 import com.example.luminarcalculator.ui.GraphScreen
 import com.example.luminarcalculator.ui.UnitConverterScreen
 import com.example.luminarcalculator.ui.components.AnimatedThemeToggle
+import com.example.luminarcalculator.ui.components.ExecutiveInfoDialog
 import com.example.luminarcalculator.ui.theme.LuminarCalculatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +55,7 @@ fun MainAppScreen(
     var currentTab by rememberSaveable { mutableStateOf(ScreenTab.CALC) }
     var displayValue by rememberSaveable { mutableStateOf("0") }
     var expressionValue by rememberSaveable { mutableStateOf("") }
+    var showInfoDialog by rememberSaveable { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
 
     Surface(
@@ -81,7 +83,7 @@ fun MainAppScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left Actions (History & Info)
+                    // Left Actions (History & Info Modal Trigger)
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove) }) {
                             Icon(
@@ -90,10 +92,13 @@ fun MainAppScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        IconButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove) }) {
+                        IconButton(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            showInfoDialog = true
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Info,
-                                contentDescription = "Info",
+                                contentDescription = "App Release Info",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -148,9 +153,9 @@ fun MainAppScreen(
                         displayValue = displayValue,
                         expressionValue = expressionValue,
                         onButtonClick = { symbol ->
-                            val (newDisp, newExpr) = CalculatorEngine.handleInput(symbol, displayValue, expressionValue)
-                            displayValue = newDisp
-                            expressionValue = newExpr
+                            val state = CalculatorEngine.handleInput(symbol, displayValue, expressionValue)
+                            displayValue = state.display
+                            expressionValue = state.expression
                         }
                     )
                     ScreenTab.GRAPH -> GraphScreen(isDarkMode = isDarkMode)
@@ -158,5 +163,10 @@ fun MainAppScreen(
                 }
             }
         }
+    }
+
+    // Executive Version History Modal Dialog
+    if (showInfoDialog) {
+        ExecutiveInfoDialog(onDismiss = { showInfoDialog = false })
     }
 }
