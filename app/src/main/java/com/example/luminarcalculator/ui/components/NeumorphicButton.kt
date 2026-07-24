@@ -1,7 +1,9 @@
 package com.example.luminarcalculator.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -16,8 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,25 +38,23 @@ fun NeumorphicButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val haptic = LocalHapticFeedback.current
 
-    // Smooth shade fade color calculation
-    val baseColor = if (isPrimary) {
+    // Executive Spring compression mechanics on button click
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.93f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "ButtonScaleSpring"
+    )
+
+    val surfaceColor = if (isPrimary) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.surface
     }
-
-    val targetColor = if (isPressed) {
-        baseColor.copy(alpha = 0.7f) // Smooth shade fade effect on press
-    } else {
-        baseColor
-    }
-
-    val animatedColor by animateColorAsState(
-        targetValue = targetColor,
-        animationSpec = tween(durationMillis = 100),
-        label = "KeyFadeAnimation"
-    )
 
     val finalTextColor = textColor ?: if (isPrimary) {
         Color.White
@@ -60,26 +64,40 @@ fun NeumorphicButton(
 
     Surface(
         modifier = modifier
+            .scale(scale)
             .shadow(
-                elevation = if (isPressed) 1.dp else 5.dp, // Tactile press elevation
-                shape = RoundedCornerShape(18.dp)
+                elevation = if (isPressed) 2.dp else 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.25f),
+                spotColor = Color.Black.copy(alpha = 0.45f)
+            )
+            .border(
+                width = 1.dp,
+                color = if (isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f) 
+                        else MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(20.dp)
             )
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick
+                onClick = {
+                    // Tactile micro-haptic feedback on keypress
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onClick()
+                }
             ),
-        shape = RoundedCornerShape(18.dp),
-        color = animatedColor
+        shape = RoundedCornerShape(20.dp),
+        color = surfaceColor
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(vertical = 18.dp, horizontal = 16.dp)
         ) {
             Text(
                 text = text,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
                 color = finalTextColor
             )
         }
