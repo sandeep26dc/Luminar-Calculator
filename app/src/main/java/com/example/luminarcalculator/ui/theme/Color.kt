@@ -2,20 +2,18 @@ package com.example.luminarcalculator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Theme Colors
-val LightBackground = Color(0xFFE3EDF7)
-val LightKeyNum = Color(0xFFE3EDF7)
-val LightKeyOp = Color(0xFFD0DFEE)
-val LightKeyTop = Color(0xFFD0DFEE)
-val LightKeyAccent = Color(0xFF00E5FF)
-val LightTextPrimary = Color(0xFF1E293B)
-val LightTextSecondary = Color(0xFF64748B)
-
 // Dark Theme Colors
-val DarkBackground = Color(0xFF0D1117)
-val DarkKeyNum = Color(0xFF14181F)
-val DarkKeyOp = Color(0xFF1C222D)
-val DarkKeyTop = Color(0xFF1C222D)
-val DarkKeyAccent = Color(0xFF00E5FF)
-val DarkTextPrimary = Color(0xFFFFFFFF)
-val DarkTextSecondary = Color(0xFF94A3B8)
+val DarkBackground = Color(0xFF0F172A)      // Deep Slate Background
+val DarkSurface = Color(0xFF1E293B)         // Key Surface
+val DarkSurfaceVariant = Color(0xFF334155)  // Secondary Button / Border
+val DarkOnBackground = Color(0xFFF8FAFC)    // Pure Crisp White Input Text
+val DarkOnSurfaceVariant = Color(0xFFCBD5E1)// Readable Secondary Text
+val CyanPrimaryDark = Color(0xFF38BDF8)     // High-Vis Sky Blue for Dark Mode
+
+// Light Theme Colors
+val LightBackground = Color(0xFFF1F5F9)     // Soft Premium Grey
+val LightSurface = Color(0xFFFFFFFF)        // Clean Elevated Key Surface
+val LightSurfaceVariant = Color(0xFFE2E8F0) // Subtle Key Border Variant
+val LightOnBackground = Color(0xFF0F172A)   // Deep Slate Black Input Text
+val LightOnSurfaceVariant = Color(0xFF475569)// Crisp Secondary Text
+val CyanPrimaryLight = Color(0xFF0284C7)    // High-Contrast Deep Blue (Fixes Day Mode)
