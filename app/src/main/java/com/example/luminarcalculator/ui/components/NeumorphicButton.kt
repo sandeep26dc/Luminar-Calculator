@@ -1,82 +1,87 @@
 package com.example.luminarcalculator.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.luminarcalculator.ui.theme.*
-
-enum class ButtonRole { NUMBER, OPERATOR, TOP_ROW, ACCENT_EQUALS }
 
 @Composable
 fun NeumorphicButton(
     text: String,
-    role: ButtonRole,
-    isDarkMode: Boolean,
     modifier: Modifier = Modifier,
+    isPrimary: Boolean = false,
+    textColor: Color? = null,
     onClick: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val handleTouch = {
-        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        onClick()
+    // Smooth shade fade color calculation
+    val baseColor = if (isPrimary) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surface
     }
 
-    val bgColor = when (role) {
-        ButtonRole.NUMBER -> if (isDarkMode) DarkKeyNum else LightKeyNum
-        ButtonRole.OPERATOR -> if (isDarkMode) DarkKeyOp else LightKeyOp
-        ButtonRole.TOP_ROW -> if (isDarkMode) DarkKeyTop else LightKeyTop
-        ButtonRole.ACCENT_EQUALS -> if (isDarkMode) DarkKeyAccent else LightKeyAccent
+    val targetColor = if (isPressed) {
+        baseColor.copy(alpha = 0.7f) // Smooth shade fade effect on press
+    } else {
+        baseColor
     }
 
-    val textColor = when (role) {
-        ButtonRole.ACCENT_EQUALS -> Color.White
-        ButtonRole.OPERATOR -> Color(0xFF00E5FF)
-        else -> if (isDarkMode) DarkTextPrimary else LightTextPrimary
+    val animatedColor by animateColorAsState(
+        targetValue = targetColor,
+        animationSpec = tween(durationMillis = 100),
+        label = "KeyFadeAnimation"
+    )
+
+    val finalTextColor = textColor ?: if (isPrimary) {
+        Color.White
+    } else {
+        MaterialTheme.colorScheme.onSurface
     }
 
-    val elevation = if (isPressed) 1.dp else 4.dp
-
-    Box(
+    Surface(
         modifier = modifier
-            .padding(4.dp)
-            .height(60.dp)
             .shadow(
-                elevation = elevation,
-                shape = RoundedCornerShape(18.dp),
-                clip = false
+                elevation = if (isPressed) 1.dp else 5.dp, // Tactile press elevation
+                shape = RoundedCornerShape(18.dp)
             )
-            .clip(RoundedCornerShape(18.dp))
-            .background(bgColor)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = handleTouch
+                onClick = onClick
             ),
-        contentAlignment = Alignment.Center
+        shape = RoundedCornerShape(18.dp),
+        color = animatedColor
     ) {
-        Text(
-            text = text,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = textColor
-        )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = text,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = finalTextColor
+            )
+        }
     }
 }
