@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.luminarcalculator.data.ConverterAndHistory
+import com.example.luminarcalculator.data.ConversionResult
 
 @Composable
 fun UnitConverterScreen(isDarkMode: Boolean) {
@@ -29,7 +30,7 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
     val haptic = LocalHapticFeedback.current
 
     val categories = listOf("Length", "Weight", "Temp")
-    val conversions = ConverterAndHistory.convert(category, inputValue.toDoubleOrNull() ?: 0.0)
+    val conversions: List<ConversionResult> = ConverterAndHistory.convert(category, inputValue.toDoubleOrNull() ?: 0.0)
 
     Column(
         modifier = Modifier
@@ -116,7 +117,7 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(conversions) { (unitName, value) ->
+            items(conversions) { item ->
                 Surface(
                     shape = RoundedCornerShape(18.dp),
                     color = MaterialTheme.colorScheme.surface,
@@ -133,13 +134,13 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = unitName,
+                            text = item.unitName,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = String.format("%.4f", value),
+                            text = String.format("%.4f", item.value),
                             fontSize = 20.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
