@@ -9,8 +9,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
@@ -31,6 +31,7 @@ import com.example.luminarcalculator.ui.AIAssistantSheet
 import com.example.luminarcalculator.ui.AnimatedExecutiveFAB
 import com.example.luminarcalculator.ui.CalculatorScreen
 import com.example.luminarcalculator.ui.CalculatorViewModel
+import com.example.luminarcalculator.ui.EngineeringScreen
 import com.example.luminarcalculator.ui.FormulaLibraryScreen
 import com.example.luminarcalculator.ui.GraphScreen
 import com.example.luminarcalculator.ui.UnitConverterScreen
@@ -196,7 +197,7 @@ fun LuminarStartupAnimationScreen() {
     }
 }
 
-enum class ScreenTab { CALC, GRAPH, CONVERT, FORMULAS }
+enum class ScreenTab { CALC, GRAPH, CONVERT, FORMULAS, ENGINEERING }
 
 @Composable
 fun MainAppScreen(
@@ -238,7 +239,7 @@ fun MainAppScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Left Actions (History, Formula Library Quick Button & Info Modal Trigger)
+                        // Left Actions (History, Engineering, Formula Library & Info Modal)
                         Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                             IconButton(onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -248,6 +249,16 @@ fun MainAppScreen(
                                     imageVector = Icons.Default.History,
                                     contentDescription = "History",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                currentTab = ScreenTab.ENGINEERING
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Engineering,
+                                    contentDescription = "Engineering Modules",
+                                    tint = if (currentTab == ScreenTab.ENGINEERING) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             IconButton(onClick = {
@@ -327,6 +338,9 @@ fun MainAppScreen(
                         ScreenTab.GRAPH -> GraphScreen(isDarkMode = isDarkMode)
                         ScreenTab.CONVERT -> UnitConverterScreen(isDarkMode = isDarkMode)
                         ScreenTab.FORMULAS -> FormulaLibraryScreen(
+                            onBack = { currentTab = ScreenTab.CALC }
+                        )
+                        ScreenTab.ENGINEERING -> EngineeringScreen(
                             onBack = { currentTab = ScreenTab.CALC }
                         )
                     }
