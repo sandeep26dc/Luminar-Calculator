@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -58,7 +57,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        // Floating Action Button to toggle views or trigger AI features
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
