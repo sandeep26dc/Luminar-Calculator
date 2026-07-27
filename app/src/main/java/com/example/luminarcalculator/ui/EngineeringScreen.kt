@@ -1,5 +1,6 @@
 package com.example.luminarcalculator.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -48,7 +49,6 @@ fun EngineeringScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Navigation Bar
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -65,7 +65,6 @@ fun EngineeringScreen(
             )
         }
 
-        // Module Tabs
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -84,7 +83,6 @@ fun EngineeringScreen(
             }
         }
 
-        // Input Fields
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -105,7 +103,6 @@ fun EngineeringScreen(
             )
         }
 
-        // Result Card Display
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
