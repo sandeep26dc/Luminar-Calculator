@@ -1,4 +1,4 @@
-package com.example.luminarcalculator.ui  // (or viewmodel if placed there)
+package com.example.luminarcalculator.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
