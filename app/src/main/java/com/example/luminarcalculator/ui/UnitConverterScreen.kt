@@ -115,6 +115,9 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
 
         // Executive Glass Card Results
         LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(conversions) { item ->
