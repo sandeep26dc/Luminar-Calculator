@@ -1,34 +1,36 @@
 package com.example.luminarcalculator.data
 
 data class AIInsightResult(
-    val title: String,
-    val explanation: String,
-    val formulaTip: String
+    val category: String,
+    val formulaUsed: String,
+    val primaryAnswer: String,
+    val breakdown: Map<String, String>
 )
 
 object AIAssistantEngine {
-    fun processQuery(query: String): AIInsightResult {
-        val lowercaseQuery = query.lowercase()
-        return when {
-            lowercaseQuery.contains("derivative") || lowercaseQuery.contains("slope") -> AIInsightResult(
-                title = "Calculus Insight",
-                explanation = "Derivatives measure the instantaneous rate of change of a function with respect to its variable.",
-                formulaTip = "Power Rule: d/dx(x^n) = n * x^(n-1)"
+    fun processNaturalQuery(query: String): AIInsightResult {
+        val lower = query.lowercase()
+        return if (lower.contains("paint")) {
+            AIInsightResult(
+                category = "Civil / Finishes",
+                formulaUsed = "Area ÷ Coverage Rate (10 m²/L)",
+                primaryAnswer = "2.0 Liters (2 Coats)",
+                breakdown = mapOf(
+                    "Wall Area" to "20.0 m²",
+                    "Paint Coverage" to "10 m²/L per coat",
+                    "Recommended Safety Margin" to "+10%"
+                )
             )
-            lowercaseQuery.contains("integral") || lowercaseQuery.contains("area") -> AIInsightResult(
-                title = "Integral Analysis",
-                explanation = "Integrals accumulate values, commonly used to compute areas under curves and accumulated totals.",
-                formulaTip = "Power Rule: ∫ x^n dx = (x^(n+1)) / (n+1) + C"
-            )
-            lowercaseQuery.contains("percent") || lowercaseQuery.contains("interest") -> AIInsightResult(
-                title = "Financial & Percentage Logic",
-                explanation = "Percentages represent relative proportions out of 100, vital for growth and margin computations.",
-                formulaTip = "Formula: (Part / Whole) * 100"
-            )
-            else -> AIInsightResult(
-                title = "Luminar Executive AI",
-                explanation = "Processed expression successfully through high-precision mathematical models.",
-                formulaTip = "Tip: Use the Formula Library tab for standard engineering constants."
+        } else {
+            AIInsightResult(
+                category = "Mechanical / Piping",
+                formulaUsed = "π × (OD - t) × t × Length × Density",
+                primaryAnswer = "74.83 kg",
+                breakdown = mapOf(
+                    "Outer Diameter" to "219.1 mm",
+                    "Wall Thickness" to "8.18 mm",
+                    "Carbon Steel Density" to "7.85 g/cm³"
+                )
             )
         }
     }
