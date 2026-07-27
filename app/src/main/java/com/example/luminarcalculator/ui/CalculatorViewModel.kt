@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.luminarcalculator.data.CalculationEntity
 import com.example.luminarcalculator.data.CalculatorRepository
-import com.example.luminarcalculator.data.LuminarDatabase
+import com.example.luminarcalculator.data.CalculatorDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -27,7 +27,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         private set
 
     init {
-        val calculationDao = LuminarDatabase.getDatabase(application).calculationDao()
+        val calculationDao = CalculatorDatabase.getDatabase(application).calculationDao()
         repository = CalculatorRepository(calculationDao)
         allCalculations = repository.allCalculations
     }
@@ -53,7 +53,6 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun append(value: String) {
-        // Prevent multiple consecutive operators if needed
         currentExpression += value
     }
 
@@ -63,7 +62,6 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             val result = evaluateExpression(currentExpression)
             calculationResult = result.toString()
             
-            // Persist to Room Database
             viewModelScope.launch {
                 repository.insertCalculation(currentExpression, calculationResult)
             }
@@ -73,8 +71,6 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun evaluateExpression(expr: String): Double {
-        // Simple evaluator or token parser placeholder
-        // For a full production layout, integrate an expression parser library or use standard math evaluation
         return object : Any() {
             var pos = -1
             var ch = 0
@@ -102,8 +98,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             fun parseExpression(): Double {
                 var x = parseTerm()
                 while (true) {
-                    if (eat('+'.toInt())) x += parseTerm() // addition
-                    else if (eat('-'.toInt())) x -= parseTerm() // subtraction
+                    if (eat('+'.toInt())) x += parseTerm()
+                    else if (eat('-'.toInt())) x -= parseTerm()
                     else return x
                 }
             }
@@ -111,22 +107,22 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             fun parseTerm(): Double {
                 var x = parseFactor()
                 while (true) {
-                    if (eat('*'.toInt())) x *= parseFactor() // multiplication
-                    else if (eat('/'.toInt())) x /= parseFactor() // division
+                    if (eat('*'.toInt())) x *= parseFactor()
+                    else if (eat('/'.toInt())) x /= parseFactor()
                     else return x
                 }
             }
 
             fun parseFactor(): Double {
-                if (eat('+'.toInt())) return parseFactor() // unary plus
-                if (eat('-'.toInt())) return -parseFactor() // unary minus
+                if (eat('+'.toInt())) return parseFactor()
+                if (eat('-'.toInt())) return -parseFactor()
 
                 var x: Double
                 val startPos = pos
-                if (eat('('.toInt())) { // parentheses
+                if (eat('('.toInt())) {
                     x = parseExpression()
                     eat(')'.toInt())
-                } else if ((ch >= '0'.toInt() && ch <= '9'.toInt()) || ch == '.'.toInt()) { // numbers
+                } else if ((ch >= '0'.toInt() && ch <= '9'.toInt()) || ch == '.'.toInt()) {
                     while ((ch >= '0'.toInt() && ch <= '9'.toInt()) || ch == '.'.toInt()) nextChar()
                     x = expr.substring(startPos, pos).toDouble()
                 } else {
