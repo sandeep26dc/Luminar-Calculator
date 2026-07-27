@@ -16,8 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -26,12 +24,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.luminarcalculator.data.CalculatorEngine
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luminarcalculator.ui.CalculatorScreen
+import com.example.luminarcalculator.ui.CalculatorViewModel
 import com.example.luminarcalculator.ui.GraphScreen
 import com.example.luminarcalculator.ui.UnitConverterScreen
 import com.example.luminarcalculator.ui.components.AnimatedThemeToggle
 import com.example.luminarcalculator.ui.components.ExecutiveInfoDialog
+import com.example.luminarcalculator.ui.components.HistorySheet
 import com.example.luminarcalculator.ui.theme.LuminarCalculatorTheme
 import kotlinx.coroutines.delay
 
@@ -75,7 +75,6 @@ fun LuminarStartupAnimationScreen() {
         transitionState.value = true
     }
 
-    // Fluid spring scaling and fade transitions
     val logoScale by animateFloatAsState(
         targetValue = if (transitionState.value) 1f else 0.8f,
         animationSpec = spring(
@@ -91,7 +90,6 @@ fun LuminarStartupAnimationScreen() {
         label = "LogoAlpha"
     )
 
-    // Floating background math symbols animation progress
     val infiniteTransition = rememberInfiniteTransition(label = "MathSymbolsFloat")
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = -10f,
@@ -109,7 +107,6 @@ fun LuminarStartupAnimationScreen() {
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        // Subtle background floating math symbols for professional engineering touch
         Box(modifier = Modifier.fillMaxSize().padding(32.dp)) {
             Text(
                 text = "π",
@@ -141,7 +138,6 @@ fun LuminarStartupAnimationScreen() {
             )
         }
 
-        // Central Brand Mark & Tagline
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -200,12 +196,14 @@ enum class ScreenTab { CALC, GRAPH, CONVERT }
 @Composable
 fun MainAppScreen(
     isDarkMode: Boolean,
-    onToggleTheme: () -> Unit
+    onToggleTheme: () -> Unit,
+    viewModel: CalculatorViewModel = viewModel()
 ) {
     var currentTab by rememberSaveable { mutableStateOf(ScreenTab.CALC) }
-    var displayValue by rememberSaveable { mutableStateOf("0") }
-    var expressionValue by rememberSaveable { mutableStateOf("") }
     var showInfoDialog by rememberSaveable { mutableStateOf(false) }
+    var showHistorySheet by rememberSaveable { mutableStateOf(false) }
+    
+    val historyList by viewModel.allCalculations.collectAsState()
     val haptic = LocalHapticFeedback.current
 
     Surface(
@@ -235,7 +233,10 @@ fun MainAppScreen(
                 ) {
                     // Left Actions (History & Info Modal Trigger)
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        IconButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove) }) {
+                        IconButton(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            showHistorySheet = true
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.History,
                                 contentDescription = "History",
@@ -300,12 +301,10 @@ fun MainAppScreen(
             Box(modifier = Modifier.weight(1f)) {
                 when (currentTab) {
                     ScreenTab.CALC -> CalculatorScreen(
-                        displayValue = displayValue,
-                        expressionValue = expressionValue,
+                        displayValue = viewModel.displayValue,
+                        expressionValue = viewModel.expressionValue,
                         onButtonClick = { symbol ->
-                            val state = CalculatorEngine.handleInput(symbol, displayValue, expressionValue)
-                            displayValue = state.display
-                            expressionValue = state.expression
+                            viewModel.onButtonClick(symbol)
                         }
                     )
                     ScreenTab.GRAPH -> GraphScreen(isDarkMode = isDarkMode)
@@ -313,6 +312,15 @@ fun MainAppScreen(
                 }
             }
         }
+    }
+
+    // History Bottom Sheet Modal
+    if (showHistorySheet) {
+        HistorySheet(
+            historyList = historyList,
+            onClearHistory = { viewModel.clearHistory() },
+            onDismiss = { showHistorySheet = false }
+        )
     }
 
     // Executive Version History Modal Dialog
