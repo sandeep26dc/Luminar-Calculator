@@ -11,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.luminarcalculator.ui.AnimatedExecutiveFAB
+import com.example.luminarcalculator.ui.CalculatorViewModel
 import com.example.luminarcalculator.ui.EngineeringScreen
 import com.example.luminarcalculator.ui.theme.LuminarCalculatorTheme
-import com.example.luminarcalculator.viewmodel.CalculatorViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: CalculatorViewModel by viewModels()
