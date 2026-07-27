@@ -1,4 +1,4 @@
-package com.example.luminarcalculator.ui  // (or viewmodel if placed there)
+package com.example.luminarcalculator.ui
 
 import android.app.Application
 import androidx.compose.runtime.getValue
