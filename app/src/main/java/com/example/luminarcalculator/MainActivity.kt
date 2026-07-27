@@ -3,6 +3,7 @@ package com.example.luminarcalculator
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -15,9 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,19 +33,164 @@ import com.example.luminarcalculator.ui.UnitConverterScreen
 import com.example.luminarcalculator.ui.components.AnimatedThemeToggle
 import com.example.luminarcalculator.ui.components.ExecutiveInfoDialog
 import com.example.luminarcalculator.ui.theme.LuminarCalculatorTheme
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             var isDarkMode by rememberSaveable { mutableStateOf(true) }
+            var showSplash by rememberSaveable { mutableStateOf(true) }
+
+            // Short, premium startup sequence timer (approx 1.4 seconds)
+            LaunchedEffect(key1 = true) {
+                delay(1400L)
+                showSplash = false
+            }
 
             LuminarCalculatorTheme(darkTheme = isDarkMode) {
-                MainAppScreen(
-                    isDarkMode = isDarkMode,
-                    onToggleTheme = { isDarkMode = !isDarkMode }
-                )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    if (showSplash) {
+                        LuminarStartupAnimationScreen()
+                    } else {
+                        MainAppScreen(
+                            isDarkMode = isDarkMode,
+                            onToggleTheme = { isDarkMode = !isDarkMode }
+                        )
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun LuminarStartupAnimationScreen() {
+    val transitionState = remember { mutableStateOf(false) }
+    
+    LaunchedEffect(Unit) {
+        transitionState.value = true
+    }
+
+    // Fluid spring scaling and fade transitions
+    val logoScale by animateFloatAsState(
+        targetValue = if (transitionState.value) 1f else 0.8f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "LogoScale"
+    )
+
+    val logoAlpha by animateFloatAsState(
+        targetValue = if (transitionState.value) 1f else 0f,
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+        label = "LogoAlpha"
+    )
+
+    // Floating background math symbols animation progress
+    val infiniteTransition = rememberInfiniteTransition(label = "MathSymbolsFloat")
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = -10f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "FloatOffset"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        // Subtle background floating math symbols for professional engineering touch
+        Box(modifier = Modifier.fillMaxSize().padding(32.dp)) {
+            Text(
+                text = "π",
+                modifier = Modifier.align(Alignment.TopStart).offset(y = floatOffset.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                fontSize = 32.sp,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                text = "∑",
+                modifier = Modifier.align(Alignment.TopEnd).offset(y = (-floatOffset).dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                fontSize = 32.sp,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                text = "√",
+                modifier = Modifier.align(Alignment.BottomStart).offset(y = (-floatOffset).dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                fontSize = 32.sp,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                text = "∞",
+                modifier = Modifier.align(Alignment.BottomEnd).offset(y = floatOffset.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                fontSize = 32.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        }
+
+        // Central Brand Mark & Tagline
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .graphicsLayer(
+                    scaleX = logoScale,
+                    scaleY = logoScale,
+                    alpha = logoAlpha
+                )
+        ) {
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier
+                    .size(80.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(28.dp)),
+                shadowElevation = 12.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "L",
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "L U M I N A R",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Light,
+                letterSpacing = 8.sp,
+                fontFamily = FontFamily.Monospace
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "PRECISION CALCULATOR",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 3.sp,
+                fontFamily = FontFamily.Monospace
+            )
         }
     }
 }
@@ -114,7 +264,7 @@ fun MainAppScreen(
                             .padding(3.dp),
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        ScreenTab.values().forEach { tab ->
+                        ScreenTab.entries.forEach { tab ->
                             val isSelected = currentTab == tab
                             Button(
                                 onClick = {
