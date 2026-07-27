@@ -1,6 +1,7 @@
 package com.example.luminarcalculator.ui
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -151,7 +152,7 @@ fun AIAssistantSheet(
                                 fontWeight = FontWeight.ExtraBold
                             )
 
-                            Divider(color = Color(0xFF334155))
+                            HorizontalDivider(color = Color(0xFF334155))
 
                             res.breakdown.forEach { (label, valStr) ->
                                 Row(
