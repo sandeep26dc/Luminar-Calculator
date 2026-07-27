@@ -9,6 +9,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
@@ -25,8 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.luminarcalculator.ui.AIAssistantSheet
+import com.example.luminarcalculator.ui.AnimatedExecutiveFAB
 import com.example.luminarcalculator.ui.CalculatorScreen
 import com.example.luminarcalculator.ui.CalculatorViewModel
+import com.example.luminarcalculator.ui.FormulaLibraryScreen
 import com.example.luminarcalculator.ui.GraphScreen
 import com.example.luminarcalculator.ui.UnitConverterScreen
 import com.example.luminarcalculator.ui.components.AnimatedThemeToggle
@@ -191,7 +196,7 @@ fun LuminarStartupAnimationScreen() {
     }
 }
 
-enum class ScreenTab { CALC, GRAPH, CONVERT }
+enum class ScreenTab { CALC, GRAPH, CONVERT, FORMULAS }
 
 @Composable
 fun MainAppScreen(
@@ -202,114 +207,147 @@ fun MainAppScreen(
     var currentTab by rememberSaveable { mutableStateOf(ScreenTab.CALC) }
     var showInfoDialog by rememberSaveable { mutableStateOf(false) }
     var showHistorySheet by rememberSaveable { mutableStateOf(false) }
+    var showAiSheet by rememberSaveable { mutableStateOf(false) }
     
     val historyList by viewModel.allCalculations.collectAsState()
     val haptic = LocalHapticFeedback.current
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
-            // Executive Glass Top Control Bar
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp)
+                    .fillMaxSize()
+                    .statusBarsPadding()
             ) {
-                Row(
+                // Executive Glass Top Control Bar
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp)
                 ) {
-                    // Left Actions (History & Info Modal Trigger)
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        IconButton(onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showHistorySheet = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.History,
-                                contentDescription = "History",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        IconButton(onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showInfoDialog = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = "App Release Info",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    // Center Tab Selector Segment
                     Row(
                         modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.background,
-                                RoundedCornerShape(12.dp)
-                            )
-                            .padding(3.dp),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ScreenTab.entries.forEach { tab ->
-                            val isSelected = currentTab == tab
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    currentTab = tab
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    contentColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                elevation = ButtonDefaults.buttonElevation(0.dp)
-                            ) {
-                                Text(
-                                    text = tab.name.lowercase().replaceFirstChar { it.uppercase() },
-                                    fontSize = 12.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        // Left Actions (History, Formula Library Quick Button & Info Modal Trigger)
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            IconButton(onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                showHistorySheet = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = "History",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                currentTab = ScreenTab.FORMULAS
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Book,
+                                    contentDescription = "Formula Library",
+                                    tint = if (currentTab == ScreenTab.FORMULAS) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                showInfoDialog = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "App Release Info",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
-                    }
 
-                    // Right Side: Animated Looping Sun/Moon Theme Toggle Component
-                    AnimatedThemeToggle(
-                        isDarkMode = isDarkMode,
-                        onToggle = onToggleTheme
-                    )
+                        // Center Tab Selector Segment
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.background,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(3.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            listOf(ScreenTab.CALC, ScreenTab.GRAPH, ScreenTab.CONVERT).forEach { tab ->
+                                val isSelected = currentTab == tab
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        currentTab = tab
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        contentColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                    shape = RoundedCornerShape(10.dp),
+                                    elevation = ButtonDefaults.buttonElevation(0.dp)
+                                ) {
+                                    Text(
+                                        text = tab.name.lowercase().replaceFirstChar { it.uppercase() },
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+                        }
+
+                        // Right Side: Animated Looping Sun/Moon Theme Toggle Component
+                        AnimatedThemeToggle(
+                            isDarkMode = isDarkMode,
+                            onToggle = onToggleTheme
+                        )
+                    }
+                }
+
+                // Screen Tab Content Routing
+                Box(modifier = Modifier.weight(1f)) {
+                    when (currentTab) {
+                        ScreenTab.CALC -> CalculatorScreen(
+                            displayValue = viewModel.displayValue,
+                            expressionValue = viewModel.expressionValue,
+                            onButtonClick = { symbol ->
+                                viewModel.onButtonClick(symbol)
+                            }
+                        )
+                        ScreenTab.GRAPH -> GraphScreen(isDarkMode = isDarkMode)
+                        ScreenTab.CONVERT -> UnitConverterScreen(isDarkMode = isDarkMode)
+                        ScreenTab.FORMULAS -> FormulaLibraryScreen(
+                            onBack = { currentTab = ScreenTab.CALC }
+                        )
+                    }
                 }
             }
+        }
 
-            // Screen Tab Content Routing
-            Box(modifier = Modifier.weight(1f)) {
-                when (currentTab) {
-                    ScreenTab.CALC -> CalculatorScreen(
-                        displayValue = viewModel.displayValue,
-                        expressionValue = viewModel.expressionValue,
-                        onButtonClick = { symbol ->
-                            viewModel.onButtonClick(symbol)
-                        }
-                    )
-                    ScreenTab.GRAPH -> GraphScreen(isDarkMode = isDarkMode)
-                    ScreenTab.CONVERT -> UnitConverterScreen(isDarkMode = isDarkMode)
-                }
+        // Executive Micro-Motion Floating Action Button for AI Assistant
+        if (currentTab == ScreenTab.CALC) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                AnimatedExecutiveFAB(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showAiSheet = true
+                    }
+                )
             }
         }
     }
@@ -326,5 +364,12 @@ fun MainAppScreen(
     // Executive Version History Modal Dialog
     if (showInfoDialog) {
         ExecutiveInfoDialog(onDismiss = { showInfoDialog = false })
+    }
+
+    // AI Assistant Natural Language Query Sheet
+    if (showAiSheet) {
+        AIAssistantSheet(
+            onDismiss = { showAiSheet = false }
+        )
     }
 }
