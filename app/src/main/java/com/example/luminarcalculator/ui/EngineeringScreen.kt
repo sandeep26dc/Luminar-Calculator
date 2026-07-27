@@ -1,8 +1,6 @@
 package com.example.luminarcalculator.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -193,7 +191,7 @@ fun EngineeringScreen(
                         fontWeight = FontWeight.ExtraBold
                     )
 
-                    Divider(color = Color(0xFF334155), thickness = 1.dp)
+                    HorizontalDivider(color = Color(0xFF334155), thickness = 1.dp)
 
                     // Secondary Metrics Row/Grid
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
