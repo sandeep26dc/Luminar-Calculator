@@ -134,7 +134,7 @@ fun FormulaCard(item: FormulaItem) {
                     text = item.formula,
                     color = Color(0xFF38BDF8),
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiString ?: FontWeight.Bold
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -144,7 +144,7 @@ fun FormulaCard(item: FormulaItem) {
                 fontSize = 13.sp
             )
 
-            Divider(color = Color(0xFF334155), thickness = 0.5.dp)
+            HorizontalDivider(color = Color(0xFF334155), thickness = 0.5.dp)
 
             // Variables mapping
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
