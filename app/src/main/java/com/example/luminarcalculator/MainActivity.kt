@@ -10,9 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.luminarcalculator.ui.AnimatedExecutiveFAB
+import com.example.luminarcalculator.ui.CalculatorScreen
 import com.example.luminarcalculator.ui.CalculatorViewModel
 import com.example.luminarcalculator.ui.EngineeringScreen
+import com.example.luminarcalculator.ui.SplashVideoScreen
+import com.example.luminarcalculator.ui.components.AnimatedThemeToggle
+import com.example.luminarcalculator.ui.components.ExecutiveInfoDialog
 import com.example.luminarcalculator.ui.theme.LuminarCalculatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,52 +24,71 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LuminarCalculatorTheme {
+            var showSplash by remember { mutableStateOf(true) }
+            var currentScreen by remember { mutableStateOf("calculator") }
+            var isDarkMode by remember { mutableStateOf(true) }
+            var showInfoDialog by remember { mutableStateOf(false) }
+
+            LuminarCalculatorTheme(darkTheme = isDarkMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var currentScreen by remember { mutableStateOf("calculator") }
-                    val calculations by viewModel.allCalculations.collectAsState(initial = emptyList())
+                    if (showSplash) {
+                        SplashVideoScreen(
+                            onSplashFinished = { showSplash = false }
+                        )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when (currentScreen) {
+                                "calculator" -> {
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CalculatorScreen(
+                                            displayValue = viewModel.calculationResult.ifEmpty { viewModel.currentExpression.ifEmpty { "0" } },
+                                            expressionValue = viewModel.currentExpression,
+                                            onButtonClick = { symbol -> viewModel.onAction(symbol) }
+                                        )
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when (currentScreen) {
-                            "calculator" -> {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = "Luminar Calculator",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = MaterialTheme.colorScheme.onBackground
-                                    )
-                                    Spacer(modifier = Modifier.height(24.dp))
-                                    Button(onClick = { currentScreen = "engineering" }) {
-                                        Text("Open Engineering Modules")
+                                        // Top control bar icons (Theme Toggle, Info Dialog, and Engineering Switcher)
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .statusBarsPadding()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            AnimatedThemeToggle(
+                                                isDarkMode = isDarkMode,
+                                                onToggle = { isDarkMode = !isDarkMode }
+                                            )
+
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                IconButton(onClick = { showInfoDialog = true }) {
+                                                    Text(text = "ℹ️", fontSize = 20.sp)
+                                                }
+                                                Button(
+                                                    onClick = { currentScreen = "engineering" },
+                                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text("Engineering")
+                                                }
+                                            }
+                                        }
                                     }
                                 }
+                                "engineering" -> {
+                                    EngineeringScreen(
+                                        onBack = { currentScreen = "calculator" }
+                                    )
+                                }
                             }
-                            "engineering" -> {
-                                EngineeringScreen(
-                                    onBack = { currentScreen = "calculator" }
+
+                            if (showInfoDialog) {
+                                ExecutiveInfoDialog(
+                                    onDismiss = { showInfoDialog = false }
                                 )
                             }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(24.dp)
-                        ) {
-                            AnimatedExecutiveFAB(
-                                onClick = {
-                                    currentScreen = if (currentScreen == "calculator") "engineering" else "calculator"
-                                }
-                            )
                         }
                     }
                 }
