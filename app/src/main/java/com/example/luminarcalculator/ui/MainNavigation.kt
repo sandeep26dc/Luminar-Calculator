@@ -29,6 +29,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Formulas : Screen("formulas", "Formulas", Icons.Default.Code)
     object Units : Screen("units", "Units", Icons.Default.SwapHoriz)
     object Currency : Screen("currency", "Currency", Icons.Default.AttachMoney)
+    object UnitRates : Screen("unit_rates", "Rates", Icons.Default.Assessment)
     object Constants : Screen("constants", "Handbook", Icons.Default.Book)
     object Estimator : Screen("estimator", "Estimator", Icons.Default.Build)
 }
@@ -44,6 +45,7 @@ fun MainNavigation(isDarkMode: Boolean) {
         Screen.Formulas,
         Screen.Units,
         Screen.Currency,
+        Screen.UnitRates,
         Screen.Constants,
         Screen.Estimator
     )
@@ -76,7 +78,6 @@ fun MainNavigation(isDarkMode: Boolean) {
             ) { screen ->
                 when (screen) {
                     is Screen.Standard -> {
-                        // Pass your existing Standard Calculator content or composable here
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(text = "Standard Calculator Screen Active", color = Color(0xFF94A3B8))
                         }
@@ -92,9 +93,10 @@ fun MainNavigation(isDarkMode: Boolean) {
                         }
                     }
                     is Screen.Currency -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Currency Converter Screen Active", color = Color(0xFF94A3B8))
-                        }
+                        CurrencyScreen(isDarkMode = isDarkMode)
+                    }
+                    is Screen.UnitRates -> {
+                        UnitRateScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Constants -> ConstantsScreen(isDarkMode = isDarkMode)
                     is Screen.Estimator -> EstimatorScreen(isDarkMode = isDarkMode)
@@ -133,21 +135,12 @@ fun MainNavigation(isDarkMode: Boolean) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 screens.forEach { screen ->
                     val selected = currentScreen == screen
-                    
-                    val scaleAnim by animateFloatAsState(
-                        targetValue = if (selected) 1.12f else 1.0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        ),
-                        label = "tab_scale"
-                    )
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -159,11 +152,11 @@ fun MainNavigation(isDarkMode: Boolean) {
                                     currentScreen = screen
                                 }
                             }
-                            .padding(vertical = 8.dp, horizontal = 10.dp)
+                            .padding(vertical = 8.dp, horizontal = 6.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(if (selected) 36.dp else 28.dp)
+                                .size(if (selected) 34.dp else 26.dp)
                                 .clip(CircleShape)
                                 .background(
                                     if (selected) Color(0xFF38BDF8).copy(alpha = 0.15f)
@@ -175,14 +168,14 @@ fun MainNavigation(isDarkMode: Boolean) {
                                 imageVector = screen.icon,
                                 contentDescription = screen.title,
                                 tint = if (selected) Color(0xFF38BDF8) else Color(0xFF64748B),
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = screen.title,
                             color = if (selected) Color(0xFF38BDF8) else Color(0xFF64748B),
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             maxLines = 1
                         )
                     }
