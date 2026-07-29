@@ -73,6 +73,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             viewModelScope.launch {
                 repository.insertCalculation(
                     CalculationEntity(
+                        id = 0,
                         expression = currentExpression,
                         result = calculationResult,
                         timestamp = System.currentTimeMillis()
