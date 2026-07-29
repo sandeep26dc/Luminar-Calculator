@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,41 +56,38 @@ fun MainNavigation(isDarkMode: Boolean) {
             .fillMaxSize()
             .background(Color(0xFF090D16))
     ) {
-        // Main Screen Content with fluid enter/exit transition
+        // Main Screen Content with fluid mercury/water-drop spring transition
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 80.dp) // Leave space for bottom bar
+                .padding(bottom = 82.dp)
         ) {
             AnimatedContent(
                 targetState = currentScreen,
                 transitionSpec = {
-                    fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) +
+                    (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessLow)) +
                             scaleIn(
-                                initialScale = 0.96f,
+                                initialScale = 0.94f,
                                 animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMedium
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
                                 )
-                            ) togetherWith
-                            fadeOut(animationSpec = spring(stiffness = Spring.StiffnessHigh))
+                            )).togetherWith(
+                        fadeOut(animationSpec = spring(stiffness = Spring.StiffnessHigh))
+                    )
                 },
-                label = "screen_transition"
+                label = "mercury_screen_transition"
             ) { screen ->
                 when (screen) {
                     is Screen.Standard -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Standard Calculator Screen Active", color = Color(0xFF94A3B8))
-                        }
+                        CalculatorScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Formulas -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Custom Formula Library Screen Active", color = Color(0xFF94A3B8))
-                        }
+                        FormulaLibraryScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Units -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Unit Converter Screen Active", color = Color(0xFF94A3B8))
+                            Text(text = "Unit Converter Active", color = Color(0xFF94A3B8))
                         }
                     }
                     is Screen.Currency -> {
@@ -104,11 +102,11 @@ fun MainNavigation(isDarkMode: Boolean) {
             }
         }
 
-        // Floating AI Assistant Button (FAB)
+        // Floating AI Assistant Button (FAB) with 3D Frosted Glow
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 96.dp)
+                .padding(end = 20.dp, bottom = 98.dp)
         ) {
             AnimatedExecutiveFAB {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -116,20 +114,24 @@ fun MainNavigation(isDarkMode: Boolean) {
             }
         }
 
-        // Fluid Glassmorphic Bottom Navigation Bar
+        // Frosted Glassmorphic Bottom Navigation Bar with Water-Drop Indicator
         Surface(
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            color = Color(0xFF0F172A).copy(alpha = 0.85f),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            color = Color(0xFF0F172A).copy(alpha = 0.80f),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(82.dp)
                 .border(
                     width = 1.dp,
                     brush = Brush.linearGradient(
-                        listOf(Color(0xFF38BDF8).copy(alpha = 0.3f), Color(0xFF6366F1).copy(alpha = 0.1f))
+                        listOf(
+                            Color(0xFF38BDF8).copy(alpha = 0.4f),
+                            Color(0xFF6366F1).copy(alpha = 0.15f),
+                            Color(0xFF38BDF8).copy(alpha = 0.1f)
+                        )
                     ),
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
                 )
         ) {
             Row(
@@ -152,15 +154,29 @@ fun MainNavigation(isDarkMode: Boolean) {
                                     currentScreen = screen
                                 }
                             }
-                            .padding(vertical = 8.dp, horizontal = 6.dp)
+                            .padding(vertical = 6.dp, horizontal = 2.dp)
                     ) {
+                        // Water-drop / Mercury fluid pill indicator container
                         Box(
                             modifier = Modifier
-                                .size(if (selected) 34.dp else 26.dp)
-                                .clip(CircleShape)
+                                .size(width = if (selected) 38.dp else 26.dp, height = 26.dp)
+                                .clip(RoundedCornerShape(14.dp))
                                 .background(
-                                    if (selected) Color(0xFF38BDF8).copy(alpha = 0.15f)
-                                    else Color.Transparent
+                                    if (selected) {
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                Color(0xFF38BDF8).copy(alpha = 0.25f),
+                                                Color(0xFF0EA5E9).copy(alpha = 0.15f)
+                                            )
+                                        )
+                                    } else {
+                                        Color.Transparent
+                                    }
+                                )
+                                .border(
+                                    width = if (selected) 1.dp else 0.dp,
+                                    color = if (selected) Color(0xFF38BDF8).copy(alpha = 0.5f) else Color.Transparent,
+                                    shape = RoundedCornerShape(14.dp)
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -168,14 +184,15 @@ fun MainNavigation(isDarkMode: Boolean) {
                                 imageVector = screen.icon,
                                 contentDescription = screen.title,
                                 tint = if (selected) Color(0xFF38BDF8) else Color(0xFF64748B),
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = screen.title,
                             color = if (selected) Color(0xFF38BDF8) else Color(0xFF64748B),
-                            fontSize = 9.sp,
+                            fontSize = 8.5.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                             maxLines = 1
                         )
                     }
