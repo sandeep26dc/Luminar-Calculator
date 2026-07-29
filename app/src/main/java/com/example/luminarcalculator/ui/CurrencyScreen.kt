@@ -13,30 +13,21 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.luminarcalculator.data.CurrencyRateComparison
+import com.example.luminarcalculator.ui.components.CurrencyRateCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
-
-data class CurrencyRateItem(
-    val currencyCode: String,
-    val currencyName: String,
-    val symbol: String,
-    val liveRate: Double,
-    val thumbRuleRate: Double,
-    val isOnlineRate: Boolean
-)
 
 @Composable
 fun CurrencyScreen(isDarkMode: Boolean) {
@@ -85,7 +76,6 @@ fun CurrencyScreen(isDarkMode: Boolean) {
         "CAD" to "C$"
     )
 
-    // Function to fetch live rates via open API when connected
     fun fetchLiveRates() {
         coroutineScope.launch {
             isLoading = true
@@ -128,18 +118,19 @@ fun CurrencyScreen(isDarkMode: Boolean) {
 
     val parsedInput = inputValue.toDoubleOrNull() ?: 0.0
 
+    // Build comparison objects mapping standard baseline vs live market rates
     val displayList = currencies.filter { it != baseCurrency }.map { code ->
         val liveRate = ratesMap[code] ?: thumbRuleMap[code] ?: 1.0
         val thumbRate = thumbRuleMap[code] ?: 1.0
-        val activeRate = if (isOnline && ratesMap.containsKey(code)) liveRate else thumbRate
-        CurrencyRateItem(
-            currencyCode = code,
-            currencyName = currencyNames[code] ?: code,
-            symbol = currencySymbols[code] ?: code,
-            liveRate = parsedInput * activeRate,
-            thumbRuleRate = parsedInput * thumbRate,
-            isOnlineRate = isOnline
+        
+        val comparison = CurrencyRateComparison(
+            currencyCode = "$baseCurrency/$code",
+            standardRate = thumbRate,
+            liveMarketRate = liveRate,
+            isConnected = isOnline
         )
+
+        Triple(code, currencyNames[code] ?: code, comparison)
     }
 
     Column(
@@ -266,62 +257,44 @@ fun CurrencyScreen(isDarkMode: Boolean) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Conversion Results List
+        // Conversion Results List featuring CurrencyRateCard analytics
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(displayList) { item ->
-                Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = Color(0xFF1E293B).copy(alpha = 0.4f),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(4.dp, RoundedCornerShape(18.dp))
-                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.15f), RoundedCornerShape(18.dp))
+            items(displayList) { (code, name, comparison) ->
+                Column(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Currency Info Label
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(18.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(horizontal = 4.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column {
-                            Text(
-                                text = item.currencyCode,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFF8FAFC)
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = item.currencyName,
-                                fontSize = 12.sp,
-                                color = Color(0xFF94A3B8)
-                            )
-                        }
-
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = "${item.symbol} ${String.format("%.2f", item.liveRate)}",
-                                fontSize = 20.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF38BDF8)
-                            )
-                            if (!item.isOnlineRate) {
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "Thumb-rule rate",
-                                    fontSize = 10.sp,
-                                    color = Color(0xFFF59E0B)
-                                )
-                            }
-                        }
+                        Text(
+                            text = name,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFF8FAFC)
+                        )
+                        val calculatedAmount = parsedInput * if (isOnline) (ratesMap[code] ?: comparison.standardRate) else comparison.standardRate
+                        Text(
+                            text = "Total: ${String.format("%.2f", calculatedAmount)}",
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF38BDF8)
+                        )
                     }
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Drop in the detailed comparison rate card with inflation/deflation tracker
+                    CurrencyRateCard(comparison = comparison)
                 }
             }
         }
