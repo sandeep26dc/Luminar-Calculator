@@ -2,7 +2,6 @@ package com.example.luminarcalculator.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -118,13 +117,13 @@ fun EngineeringScreen(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 
-                secondaryMetrics.forEach { (label, valueStr) ->
+                secondaryMetrics.forEach { entry ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-                        Text(text = valueStr, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(text = entry.key, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                        Text(text = entry.value, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
