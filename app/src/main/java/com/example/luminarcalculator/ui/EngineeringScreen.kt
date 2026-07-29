@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +18,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun EngineeringScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToFormulas: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf("Civil") }
     var param1 by remember { mutableStateOf("5.0") }
@@ -50,18 +52,24 @@ fun EngineeringScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                }
+                Text(
+                    text = "ENGINEERING MODULES",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp
+                )
             }
-            Text(
-                text = "ENGINEERING MODULES",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.5.sp
-            )
+            IconButton(onClick = onNavigateToFormulas) {
+                Icon(imageVector = Icons.Default.Book, contentDescription = "Formula Library", tint = MaterialTheme.colorScheme.primary)
+            }
         }
 
         Row(
