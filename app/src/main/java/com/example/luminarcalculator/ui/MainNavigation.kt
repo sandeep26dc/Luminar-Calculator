@@ -42,7 +42,6 @@ fun MainNavigation(isDarkMode: Boolean) {
     var currentScreen by rememberSaveable { mutableStateOf<Screen>(Screen.Standard) }
     var showAiSheet by rememberSaveable { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
-    val calcViewModel: CalculatorViewModel = viewModel()
 
     val screens = listOf(
         Screen.Standard,
@@ -81,29 +80,17 @@ fun MainNavigation(isDarkMode: Boolean) {
                 label = "mercury_screen_transition"
             ) { screen ->
                 when (screen) {
-                    is Screen.Standard -> {
-                        CalculatorScreen(
-                            isDarkMode = isDarkMode
-                        )
-                    }
-                    is Screen.Formulas -> {
-                        FormulaLibraryScreen(
-                            isDarkMode = isDarkMode
-                        )
-                    }
+                    is Screen.Standard -> CalculatorScreen()
+                    is Screen.Formulas -> FormulaLibraryScreen()
                     is Screen.Units -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(text = "Unit Converter Active", color = Color(0xFF94A3B8))
                         }
                     }
-                    is Screen.Currency -> {
-                        CurrencyScreen(isDarkMode = isDarkMode)
-                    }
-                    is Screen.UnitRates -> {
-                        UnitRateScreen(isDarkMode = isDarkMode)
-                    }
-                    is Screen.Constants -> ConstantsScreen(isDarkMode = isDarkMode)
-                    is Screen.Estimator -> EstimatorScreen(isDarkMode = isDarkMode)
+                    is Screen.Currency -> CurrencyScreen()
+                    is Screen.UnitRates -> UnitRateScreen()
+                    is Screen.Constants -> ConstantsScreen()
+                    is Screen.Estimator -> EstimatorScreen()
                 }
             }
         }
