@@ -1,6 +1,6 @@
 package com.example.luminarcalculator.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,8 +20,8 @@ fun CurrencyRateCard(
     comparison: CurrencyRateComparison,
     modifier: Modifier = Modifier
 ) {
-    val isInflated = comparison.variancePercentage > 0.2
-    val isDeflated = comparison.variancePercentage < -0.2
+    val isInflated = comparison.variancePercentage > 0.5
+    val isDeflated = comparison.variancePercentage < -0.5
     
     val badgeColor = when {
         !comparison.isConnected -> Color(0xFF64748B) // Slate for offline
@@ -114,14 +114,14 @@ fun CurrencyRateCard(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Divider(color = Color(0xFF334155), thickness = 1.dp)
+            HorizontalDivider(color = Color(0xFF334155), thickness = 1.dp)
             Spacer(modifier = Modifier.height(10.dp))
 
             // Variance / Inflation Status Note
             Text(
                 text = comparison.marketStatus,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.SemiWord,
+                fontWeight = FontWeight.SemiBold,
                 color = badgeColor
             )
         }
