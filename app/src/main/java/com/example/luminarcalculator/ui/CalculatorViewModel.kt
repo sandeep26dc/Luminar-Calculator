@@ -67,7 +67,13 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             }
             
             viewModelScope.launch {
-                repository.insertCalculation(currentExpression, calculationResult)
+                repository.insertCalculation(
+                    CalculationEntity(
+                        expression = currentExpression,
+                        result = calculationResult,
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
             }
         } catch (e: Exception) {
             calculationResult = "Error"
@@ -75,7 +81,6 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun evaluateExpression(expr: String): Double {
-        // Normalize custom visual symbols to standard operators
         val formatted = expr.replace("×", "*").replace("÷", "/")
         return object : Any() {
             var pos = -1
