@@ -3,6 +3,7 @@ package com.example.luminarcalculator.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -32,7 +34,8 @@ fun HistorySheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = Color(0xFF0F172A),
-        tonalElevation = 8.dp
+        tonalElevation = 8.dp,
+        modifier = Modifier.border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.2f), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
     ) {
         Column(
             modifier = Modifier
@@ -82,21 +85,20 @@ fun HistorySheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(historyList) { item ->
-                        Card(
+                        Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .shadow(3.dp, RoundedCornerShape(16.dp))
+                                .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.15f), RoundedCornerShape(16.dp))
                                 .clickable {
                                     onItemClick(item.result)
                                     onDismiss()
                                 },
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFF1E293B).copy(alpha = 0.5f)
-                            ),
                             shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.15f))
+                            color = Color(0xFF1E293B).copy(alpha = 0.4f)
                         ) {
                             Column(
                                 modifier = Modifier
