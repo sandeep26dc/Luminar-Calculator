@@ -22,6 +22,36 @@ data class CurrencyRateComparison(
         }
 }
 
+data class UnitRateComparison(
+    val itemCode: String,
+    val itemName: String,
+    val unitOfMeasurement: String, // e.g., "m³", "MT", "Nos", "Rm"
+    val baselineRate: Double,       // Budgeted / Standard baseline rate
+    val actualOrMarketRate: Double, // Current actual site rate or market quote
+    val quantity: Double            // Total quantity required for the project
+) {
+    val totalBaselineCost: Double
+        get() = baselineRate * quantity
+
+    val totalActualCost: Double
+        get() = actualOrMarketRate * quantity
+
+    val costVariance: Double
+        get() = totalActualCost - totalBaselineCost
+
+    val variancePercentage: Double
+        get() = if (baselineRate > 0.0) {
+            ((actualOrMarketRate - baselineRate) / baselineRate) * 100.0
+        } else 0.0
+
+    val rateStatus: String
+        get() = when {
+            variancePercentage > 1.0 -> "Over Budget by ${String.format("%.2f", variancePercentage)}%"
+            variancePercentage < -1.0 -> "Cost Saving of ${String.format("%.2f", kotlin.math.abs(variancePercentage))}%"
+            else -> "Aligned with Baseline"
+        }
+}
+
 object ConverterAndHistory {
     fun convert(category: String, input: Double): List<ConversionResult> {
         return when (category) {
