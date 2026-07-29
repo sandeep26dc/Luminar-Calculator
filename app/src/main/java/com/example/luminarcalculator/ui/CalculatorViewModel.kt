@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.luminarcalculator.data.CalculationEntity
 import com.example.luminarcalculator.data.CalculatorRepository
 import com.example.luminarcalculator.data.CalculatorDatabase
+import com.example.luminarcalculator.data.FormulaEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -16,6 +17,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val repository: CalculatorRepository
 
     val allCalculations: Flow<List<CalculationEntity>>
+    val allFormulas: Flow<List<FormulaEntity>>
 
     var currentExpression by mutableStateOf("")
         private set
@@ -30,6 +32,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         val calculationDao = CalculatorDatabase.getDatabase(application).calculationDao()
         repository = CalculatorRepository(calculationDao)
         allCalculations = repository.allCalculations
+        allFormulas = repository.allFormulas
     }
 
     fun onAction(action: String) {
@@ -146,5 +149,27 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun clearHistory() = viewModelScope.launch {
         repository.clearHistory()
+    }
+
+    // --- Formula Management Functions ---
+
+    fun insertFormula(title: String, category: String, formula: String, variablesString: String) {
+        viewModelScope.launch {
+            repository.insertFormula(
+                FormulaEntity(
+                    title = title,
+                    category = category,
+                    formula = formula,
+                    variablesString = variablesString,
+                    isCustom = true
+                )
+            )
+        }
+    }
+
+    fun deleteFormula(formula: FormulaEntity) {
+        viewModelScope.launch {
+            repository.deleteFormula(formula)
+        }
     }
 }
