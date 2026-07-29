@@ -3,12 +3,22 @@ package com.example.luminarcalculator
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.luminarcalculator.ui.CalculatorScreen
@@ -24,6 +34,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge() // Seamless edge-to-edge system bar integration
         setContent {
             var showSplash by remember { mutableStateOf(true) }
             var currentScreen by remember { mutableStateOf("calculator") }
@@ -50,12 +61,12 @@ class MainActivity : ComponentActivity() {
                                             onButtonClick = { symbol -> viewModel.onAction(symbol) }
                                         )
 
-                                        // Top control bar icons (Theme Toggle, Info Dialog, and Engineering Switcher)
+                                        // Executive Top Control Bar (Integrated natively with system status bars)
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .statusBarsPadding()
-                                                .padding(16.dp),
+                                                .padding(horizontal = 20.dp, vertical = 12.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
@@ -64,15 +75,47 @@ class MainActivity : ComponentActivity() {
                                                 onToggle = { isDarkMode = !isDarkMode }
                                             )
 
-                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                                IconButton(onClick = { showInfoDialog = true }) {
-                                                    Text(text = "ℹ️", fontSize = 20.sp)
-                                                }
-                                                Button(
-                                                    onClick = { currentScreen = "engineering" },
-                                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                // High-End Minimalist Info Button (Replacing the awkward grey square box)
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(38.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFF1E293B).copy(alpha = 0.8f))
+                                                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.4f), CircleShape)
+                                                        .clickable { showInfoDialog = true },
+                                                    contentAlignment = Alignment.Center
                                                 ) {
-                                                    Text("Engineering")
+                                                    Text(
+                                                        text = "i",
+                                                        color = Color(0xFF38BDF8),
+                                                        fontSize = 16.sp,
+                                                        fontFamily = FontFamily.Serif,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+
+                                                // Premium Glassmorphic Engineering Button
+                                                Box(
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(14.dp))
+                                                        .background(Color(0xFF0F172A).copy(alpha = 0.9f))
+                                                        .border(1.dp, Color(0xFF6366F1).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                                                        .clickable { currentScreen = "engineering" }
+                                                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(
+                                                        text = "ENGINEERING",
+                                                        color = Color(0xFF818CF8),
+                                                        fontSize = 11.sp,
+                                                        fontFamily = FontFamily.Monospace,
+                                                        fontWeight = FontWeight.Bold,
+                                                        letterSpacing = 1.5.sp
+                                                    )
                                                 }
                                             }
                                         }
