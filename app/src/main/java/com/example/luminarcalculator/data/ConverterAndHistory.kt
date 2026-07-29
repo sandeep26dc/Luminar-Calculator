@@ -2,11 +2,11 @@ package com.example.luminarcalculator.data
 
 data class ConversionResult(val unitName: String, val value: Double)
 
-data class CurrencyComparisonResult(
+data class CurrencyRateComparison(
     val currencyCode: String,
     val standardRate: Double,
     val liveMarketRate: Double,
-    val isOnline: Boolean
+    val isConnected: Boolean
 ) {
     val variancePercentage: Double
         get() = if (standardRate > 0.0) {
@@ -15,10 +15,10 @@ data class CurrencyComparisonResult(
 
     val marketStatus: String
         get() = when {
-            !isOnline -> "Offline Mode (Using Standard Rate)"
-            variancePercentage > 0.2 -> "Inflated by ${String.format("%.2f", variancePercentage)}% vs Standard"
-            variancePercentage < -0.2 -> "Deflated by ${String.format("%.2f", kotlin.math.abs(variancePercentage))}% vs Standard"
-            else -> "Aligned with Standard Baseline"
+            !isConnected -> "Offline (Using Standard Baseline)"
+            variancePercentage > 0.5 -> "Inflated by ${String.format("%.2f", variancePercentage)}%"
+            variancePercentage < -0.5 -> "Deflated by ${String.format("%.2f", kotlin.math.abs(variancePercentage))}%"
+            else -> "Aligned with Standard Rate"
         }
 }
 
@@ -44,20 +44,5 @@ object ConverterAndHistory {
             )
             else -> emptyList()
         }
-    }
-
-    // Standard vs Live Market Currency Comparison with Inflation/Deflation tracking
-    fun compareCurrencyRate(
-        currencyCode: String,
-        standardBaselineRate: Double,
-        liveOnlineRate: Double,
-        isOnline: Boolean
-    ): CurrencyComparisonResult {
-        return CurrencyComparisonResult(
-            currencyCode = currencyCode,
-            standardRate = standardBaselineRate,
-            liveMarketRate = liveOnlineRate,
-            isOnline = isOnline
-        )
     }
 }
