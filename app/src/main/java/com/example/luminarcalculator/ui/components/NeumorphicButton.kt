@@ -10,7 +10,6 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,30 +50,29 @@ fun NeumorphicButton(
     )
 
     val surfaceColor = if (isPrimary) {
-        MaterialTheme.colorScheme.primary
+        Color(0xFF38BDF8)
     } else {
-        MaterialTheme.colorScheme.surface
+        Color(0xFF1E293B).copy(alpha = 0.5f)
     }
 
     val finalTextColor = textColor ?: if (isPrimary) {
-        Color.White
+        Color(0xFF090D16)
     } else {
-        MaterialTheme.colorScheme.onSurface
+        Color(0xFFF8FAFC)
     }
 
     Surface(
         modifier = modifier
             .scale(scale)
             .shadow(
-                elevation = if (isPressed) 2.dp else 8.dp,
+                elevation = if (isPressed) 2.dp else 6.dp,
                 shape = RoundedCornerShape(20.dp),
-                ambientColor = Color.Black.copy(alpha = 0.25f),
-                spotColor = Color.Black.copy(alpha = 0.45f)
+                ambientColor = Color.Black.copy(alpha = 0.4f),
+                spotColor = Color.Black.copy(alpha = 0.6f)
             )
             .border(
                 width = 1.dp,
-                color = if (isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f) 
-                        else MaterialTheme.colorScheme.surfaceVariant,
+                color = if (isPrimary) Color(0xFF38BDF8) else Color(0xFF38BDF8).copy(alpha = 0.15f),
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(
