@@ -30,7 +30,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     init {
         val calculationDao = CalculatorDatabase.getDatabase(application).calculationDao()
-        repository = CalculatorRepository(calculationDao)
+        val formulaDao = CalculatorDatabase.getDatabase(application).formulaDao()
+        repository = CalculatorRepository(calculationDao, formulaDao)
         allCalculations = repository.allCalculations
         allFormulas = repository.allFormulas
     }
@@ -136,8 +137,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                 if (eat('('.code)) {
                     x = parseExpression()
                     eat(')'.code)
-                } else if ((ch >= '0'.code && ch <= '9'.code) || ch == '.code') {
-                    while ((ch >= '0'.code && ch <= '9'.code) || ch == '.code') nextChar()
+                } else if ((ch >= '0'.code && ch <= '9'.code) || ch == '.'.code) {
+                    while ((ch >= '0'.code && ch <= '9'.code) || ch == '.'.code) nextChar()
                     x = formatted.substring(startPos, pos).toDouble()
                 } else {
                     throw RuntimeException("Unexpected: " + ch.toChar())
