@@ -46,10 +46,13 @@ fun EngineeringScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFF090D16))
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Header Row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -57,39 +60,47 @@ fun EngineeringScreen(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFF8FAFC))
                 }
                 Text(
                     text = "ENGINEERING MODULES",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = Color(0xFFF8FAFC),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.5.sp
                 )
             }
             IconButton(onClick = onNavigateToFormulas) {
-                Icon(imageVector = Icons.Default.Book, contentDescription = "Formula Library", tint = MaterialTheme.colorScheme.primary)
+                Icon(imageVector = Icons.Default.Book, contentDescription = "Formula Library", tint = Color(0xFF38BDF8))
             }
         }
 
+        // Tab Selector
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf("Civil", "Mechanical", "Electrical").forEach { tab ->
+                val isSelected = selectedTab == tab
                 Button(
                     onClick = { selectedTab = tab },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        containerColor = if (isSelected) Color(0xFF38BDF8) else Color(0xFF1E293B).copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = tab, color = if (selectedTab == tab) Color.White else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                    Text(
+                        text = tab,
+                        color = if (isSelected) Color(0xFF090D16) else Color(0xFF94A3B8),
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        fontSize = 12.sp
+                    )
                 }
             }
         }
 
+        // Input Parameters
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -99,39 +110,54 @@ fun EngineeringScreen(
                 onValueChange = { param1 = it },
                 label = { Text("Parameter 1") },
                 modifier = Modifier.weight(1f),
-                singleLine = true
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF38BDF8),
+                    unfocusedBorderColor = Color(0xFF38BDF8).copy(alpha = 0.2f),
+                    focusedTextColor = Color(0xFFF8FAFC),
+                    unfocusedTextColor = Color(0xFFF8FAFC)
+                ),
+                shape = RoundedCornerShape(12.dp)
             )
             OutlinedTextField(
                 value = param2,
                 onValueChange = { param2 = it },
                 label = { Text("Parameter 2") },
                 modifier = Modifier.weight(1f),
-                singleLine = true
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF38BDF8),
+                    unfocusedBorderColor = Color(0xFF38BDF8).copy(alpha = 0.2f),
+                    focusedTextColor = Color(0xFFF8FAFC),
+                    unfocusedTextColor = Color(0xFFF8FAFC)
+                ),
+                shape = RoundedCornerShape(12.dp)
             )
         }
 
+        // Result Card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B).copy(alpha = 0.4f)),
             shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
+            border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.15f))
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(text = "PRIMARY RESULT", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text(text = primaryMetric, color = MaterialTheme.colorScheme.onSurface, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                Text(text = "PRIMARY RESULT", color = Color(0xFF38BDF8), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(text = primaryMetric, color = Color(0xFFF8FAFC), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
 
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                HorizontalDivider(color = Color(0xFF38BDF8).copy(alpha = 0.15f))
 
                 secondaryMetrics.forEach { entry ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = entry.key, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-                        Text(text = entry.value, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(text = entry.key, color = Color(0xFF94A3B8), fontSize = 13.sp)
+                        Text(text = entry.value, color = Color(0xFFF8FAFC), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
