@@ -35,17 +35,18 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFF090D16))
             .statusBarsPadding()
+            .navigationBarsPadding()
             .padding(20.dp)
     ) {
         // Executive Segmented Tab Selector
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
+            color = Color(0xFF1E293B).copy(alpha = 0.5f),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
+                .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.15f), RoundedCornerShape(16.dp))
                 .padding(4.dp)
         ) {
             Row(
@@ -61,8 +62,8 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            contentColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            containerColor = if (isSelected) Color(0xFF38BDF8) else Color.Transparent,
+                            contentColor = if (isSelected) Color(0xFF090D16) else Color(0xFF94A3B8)
                         ),
                         shape = RoundedCornerShape(12.dp),
                         elevation = if (isSelected) ButtonDefaults.buttonElevation(defaultElevation = 4.dp) else ButtonDefaults.buttonElevation(0.dp)
@@ -89,22 +90,22 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
                     letterSpacing = 2.sp,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color(0xFF38BDF8)
                 ) 
             },
             textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color(0xFFF8FAFC),
                 fontSize = 26.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
             ),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+                focusedBorderColor = Color(0xFF38BDF8),
+                unfocusedBorderColor = Color(0xFF38BDF8).copy(alpha = 0.2f),
+                focusedTextColor = Color(0xFFF8FAFC),
+                unfocusedTextColor = Color(0xFFF8FAFC),
+                focusedContainerColor = Color(0xFF1E293B).copy(alpha = 0.3f),
+                unfocusedContainerColor = Color(0xFF0F172A).copy(alpha = 0.3f)
             ),
             shape = RoundedCornerShape(18.dp),
             singleLine = true,
@@ -123,11 +124,11 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
             items(conversions) { item ->
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surface,
+                    color = Color(0xFF1E293B).copy(alpha = 0.4f),
                     modifier = Modifier
                         .fillMaxWidth()
                         .shadow(4.dp, RoundedCornerShape(18.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(18.dp))
+                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.15f), RoundedCornerShape(18.dp))
                 ) {
                     Row(
                         modifier = Modifier
@@ -140,14 +141,14 @@ fun UnitConverterScreen(isDarkMode: Boolean) {
                             text = item.unitName,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = Color(0xFF94A3B8)
                         )
                         Text(
                             text = String.format("%.4f", item.value),
                             fontSize = 20.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color(0xFF38BDF8)
                         )
                     }
                 }
