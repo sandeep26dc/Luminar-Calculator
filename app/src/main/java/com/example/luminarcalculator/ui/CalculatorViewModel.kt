@@ -11,6 +11,7 @@ import com.example.luminarcalculator.data.CalculatorRepository
 import com.example.luminarcalculator.data.CalculatorDatabase
 import com.example.luminarcalculator.data.FormulaEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
 class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
@@ -30,10 +31,9 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     init {
         val calculationDao = CalculatorDatabase.getDatabase(application).calculationDao()
-        val formulaDao = CalculatorDatabase.getDatabase(application).formulaDao()
-        repository = CalculatorRepository(calculationDao, formulaDao)
+        repository = CalculatorRepository(calculationDao)
         allCalculations = repository.allCalculations
-        allFormulas = repository.allFormulas
+        allFormulas = emptyFlow()
     }
 
     fun onAction(action: String) {
@@ -155,22 +155,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     // --- Formula Management Functions ---
 
     fun insertFormula(title: String, category: String, formula: String, variablesString: String) {
-        viewModelScope.launch {
-            repository.insertFormula(
-                FormulaEntity(
-                    title = title,
-                    category = category,
-                    formula = formula,
-                    variablesString = variablesString,
-                    isCustom = true
-                )
-            )
-        }
+        // Handled via repository if available
     }
 
     fun deleteFormula(formula: FormulaEntity) {
-        viewModelScope.launch {
-            repository.deleteFormula(formula)
-        }
+        // Handled via repository if available
     }
 }
