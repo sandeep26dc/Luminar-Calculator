@@ -85,11 +85,13 @@ fun MainNavigation(isDarkMode: Boolean) {
                         CalculatorScreen(
                             displayValue = calcViewModel.calculationResult.ifEmpty { calcViewModel.currentExpression.ifEmpty { "0" } },
                             expressionValue = calcViewModel.currentExpression,
+                            isDarkMode = isDarkMode,
                             onButtonClick = { action -> calcViewModel.onAction(action) }
                         )
                     }
                     is Screen.Formulas -> {
                         FormulaLibraryScreen(
+                            isDarkMode = isDarkMode,
                             viewModel = calcViewModel,
                             onBack = { currentScreen = Screen.Standard }
                         )
@@ -100,16 +102,16 @@ fun MainNavigation(isDarkMode: Boolean) {
                         }
                     }
                     is Screen.Currency -> {
-                        CurrencyScreen()
+                        CurrencyScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.UnitRates -> {
-                        UnitRateScreen()
+                        UnitRateScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Constants -> {
-                        ConstantsScreen()
+                        ConstantsScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Estimator -> {
-                        EstimatorScreen()
+                        EstimatorScreen(isDarkMode = isDarkMode)
                     }
                 }
             }
