@@ -60,7 +60,11 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         if (currentExpression.isBlank()) return
         try {
             val result = evaluateExpression(currentExpression)
-            calculationResult = result.toString()
+            calculationResult = if (result == result.toLong().toDouble()) {
+                result.toLong().toString()
+            } else {
+                result.toString()
+            }
             
             viewModelScope.launch {
                 repository.insertCalculation(currentExpression, calculationResult)
@@ -71,16 +75,18 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun evaluateExpression(expr: String): Double {
+        // Normalize custom visual symbols to standard operators
+        val formatted = expr.replace("×", "*").replace("÷", "/")
         return object : Any() {
             var pos = -1
             var ch = 0
 
             fun nextChar() {
-                ch = if (++pos < expr.length) expr[pos].toInt() else -1
+                ch = if (++pos < formatted.length) formatted[pos].code else -1
             }
 
             fun eat(charToEat: Int): Boolean {
-                while (ch == ' '.toInt()) nextChar()
+                while (ch == ' '.code) nextChar()
                 if (ch == charToEat) {
                     nextChar()
                     return true
@@ -91,15 +97,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             fun parse(): Double {
                 nextChar()
                 val x = parseExpression()
-                if (pos < expr.length) throw RuntimeException("Unexpected: " + ch.toChar())
+                if (pos < formatted.length) throw RuntimeException("Unexpected: " + ch.toChar())
                 return x
             }
 
             fun parseExpression(): Double {
                 var x = parseTerm()
                 while (true) {
-                    if (eat('+'.toInt())) x += parseTerm()
-                    else if (eat('-'.toInt())) x -= parseTerm()
+                    if (eat('+'.code)) x += parseTerm()
+                    else if (eat('-'.code)) x -= parseTerm()
                     else return x
                 }
             }
@@ -107,24 +113,24 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             fun parseTerm(): Double {
                 var x = parseFactor()
                 while (true) {
-                    if (eat('*'.toInt())) x *= parseFactor()
-                    else if (eat('/'.toInt())) x /= parseFactor()
+                    if (eat('*'.code)) x *= parseFactor()
+                    else if (eat('/'.code)) x /= parseFactor()
                     else return x
                 }
             }
 
             fun parseFactor(): Double {
-                if (eat('+'.toInt())) return parseFactor()
-                if (eat('-'.toInt())) return -parseFactor()
+                if (eat('+'.code)) return parseFactor()
+                if (eat('-'.code)) return -parseFactor()
 
                 var x: Double
                 val startPos = pos
-                if (eat('('.toInt())) {
+                if (eat('('.code)) {
                     x = parseExpression()
-                    eat(')'.toInt())
-                } else if ((ch >= '0'.toInt() && ch <= '9'.toInt()) || ch == '.'.toInt()) {
-                    while ((ch >= '0'.toInt() && ch <= '9'.toInt()) || ch == '.'.toInt()) nextChar()
-                    x = expr.substring(startPos, pos).toDouble()
+                    eat(')'.code)
+                } else if ((ch >= '0'.code && ch <= '9'.code) || ch == '.code') {
+                    while ((ch >= '0'.code && ch <= '9'.code) || ch == '.code') nextChar()
+                    x = formatted.substring(startPos, pos).toDouble()
                 } else {
                     throw RuntimeException("Unexpected: " + ch.toChar())
                 }
