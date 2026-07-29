@@ -11,6 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import com.example.luminarcalculator.ui.CalculatorScreen
 import com.example.luminarcalculator.ui.CalculatorViewModel
 import com.example.luminarcalculator.ui.EngineeringScreen
+import com.example.luminarcalculator.ui.FormulaLibraryScreen
+import com.example.luminarcalculator.ui.AIAssistantSheet
 import com.example.luminarcalculator.ui.SplashVideoScreen
 import com.example.luminarcalculator.ui.components.AnimatedThemeToggle
 import com.example.luminarcalculator.ui.components.ExecutiveInfoDialog
@@ -34,12 +38,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Seamless edge-to-edge system bar integration
+        enableEdgeToEdge()
         setContent {
             var showSplash by remember { mutableStateOf(true) }
-            var currentScreen by remember { mutableStateOf("calculator") }
+            var currentScreen by remember { mutableStateOf("calculator") } // "calculator", "engineering", "formulas"
             var isDarkMode by remember { mutableStateOf(true) }
             var showInfoDialog by remember { mutableStateOf(false) }
+            var showAiAssistant by remember { mutableStateOf(false) }
 
             LuminarCalculatorTheme(darkTheme = isDarkMode) {
                 Surface(
@@ -61,7 +66,7 @@ class MainActivity : ComponentActivity() {
                                             onButtonClick = { symbol -> viewModel.onAction(symbol) }
                                         )
 
-                                        // Executive Top Control Bar (Integrated natively with system status bars)
+                                        // Executive Top Control Bar
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -79,7 +84,25 @@ class MainActivity : ComponentActivity() {
                                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                // High-End Minimalist Info Button (Replacing the awkward grey square box)
+                                                // AI Assistant trigger button
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(38.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFF1E293B).copy(alpha = 0.8f))
+                                                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.4f), CircleShape)
+                                                        .clickable { showAiAssistant = true },
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.AutoAwesome,
+                                                        contentDescription = "AI Assistant",
+                                                        tint = Color(0xFF38BDF8),
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+
+                                                // Info Button
                                                 Box(
                                                     modifier = Modifier
                                                         .size(38.dp)
@@ -98,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 }
 
-                                                // Premium Glassmorphic Engineering Button
+                                                // Engineering Module Button
                                                 Box(
                                                     modifier = Modifier
                                                         .clip(RoundedCornerShape(14.dp))
@@ -123,7 +146,13 @@ class MainActivity : ComponentActivity() {
                                 }
                                 "engineering" -> {
                                     EngineeringScreen(
-                                        onBack = { currentScreen = "calculator" }
+                                        onBack = { currentScreen = "calculator" },
+                                        onNavigateToFormulas = { currentScreen = "formulas" }
+                                    )
+                                }
+                                "formulas" -> {
+                                    FormulaLibraryScreen(
+                                        onBack = { currentScreen = "engineering" }
                                     )
                                 }
                             }
@@ -131,6 +160,12 @@ class MainActivity : ComponentActivity() {
                             if (showInfoDialog) {
                                 ExecutiveInfoDialog(
                                     onDismiss = { showInfoDialog = false }
+                                )
+                            }
+
+                            if (showAiAssistant) {
+                                AIAssistantSheet(
+                                    onDismiss = { showAiAssistant = false }
                                 )
                             }
                         }
