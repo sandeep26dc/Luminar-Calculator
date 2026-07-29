@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Standard : Screen("standard", "Calc", Icons.Default.Calculate)
@@ -41,6 +42,7 @@ fun MainNavigation(isDarkMode: Boolean) {
     var currentScreen by rememberSaveable { mutableStateOf<Screen>(Screen.Standard) }
     var showAiSheet by rememberSaveable { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+    val calcViewModel: CalculatorViewModel = viewModel()
 
     val screens = listOf(
         Screen.Standard,
@@ -80,10 +82,14 @@ fun MainNavigation(isDarkMode: Boolean) {
             ) { screen ->
                 when (screen) {
                     is Screen.Standard -> {
-                        CalculatorScreen(isDarkMode = isDarkMode)
+                        CalculatorScreen(
+                            isDarkMode = isDarkMode
+                        )
                     }
                     is Screen.Formulas -> {
-                        FormulaLibraryScreen(isDarkMode = isDarkMode)
+                        FormulaLibraryScreen(
+                            isDarkMode = isDarkMode
+                        )
                     }
                     is Screen.Units -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
