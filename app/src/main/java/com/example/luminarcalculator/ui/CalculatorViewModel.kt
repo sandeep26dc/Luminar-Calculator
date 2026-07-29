@@ -152,13 +152,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         repository.clearHistory()
     }
 
-    // --- Formula Management Functions ---
+    fun insertFormula(title: String, category: String, formula: String, variablesString: String) {}
 
-    fun insertFormula(title: String, category: String, formula: String, variablesString: String) {
-        // Handled via repository if available
-    }
-
-    fun deleteFormula(formula: FormulaEntity) {
-        // Handled via repository if available
-    }
+    fun deleteFormula(formula: FormulaEntity) {}
 }
