@@ -51,7 +51,6 @@ fun AIAssistantSheet(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -83,7 +82,6 @@ fun AIAssistantSheet(
                     fontSize = 13.sp
                 )
 
-                // Input Field
                 OutlinedTextField(
                     value = userPrompt,
                     onValueChange = { userPrompt = it },
@@ -107,7 +105,6 @@ fun AIAssistantSheet(
                     )
                 )
 
-                // Quick Suggestion Chips
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -122,7 +119,6 @@ fun AIAssistantSheet(
                     }
                 }
 
-                // Result Box Display
                 AnimatedVisibility(
                     visible = resultState != null,
                     enter = fadeIn() + slideInVertically(),
@@ -154,13 +150,13 @@ fun AIAssistantSheet(
 
                             HorizontalDivider(color = Color(0xFF334155))
 
-                            res.breakdown.forEach { (label, valStr) ->
+                            res.breakdown.forEach { entry ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(text = label, color = Color(0xFF94A3B8), fontSize = 13.sp)
-                                    Text(text = valStr, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(text = entry.key, color = Color(0xFF94A3B8), fontSize = 13.sp)
+                                    Text(text = entry.value, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
