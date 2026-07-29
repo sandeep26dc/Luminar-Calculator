@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Standard : Screen("standard", "Calc", Icons.Default.Calculate)
@@ -42,7 +41,6 @@ fun MainNavigation(isDarkMode: Boolean) {
     var currentScreen by rememberSaveable { mutableStateOf<Screen>(Screen.Standard) }
     var showAiSheet by rememberSaveable { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
-    val calcViewModel: CalculatorViewModel = viewModel()
 
     val screens = listOf(
         Screen.Standard,
@@ -59,7 +57,6 @@ fun MainNavigation(isDarkMode: Boolean) {
             .fillMaxSize()
             .background(Color(0xFF090D16))
     ) {
-        // Main Screen Content with fluid mercury/water-drop spring transition
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,19 +80,10 @@ fun MainNavigation(isDarkMode: Boolean) {
             ) { screen ->
                 when (screen) {
                     is Screen.Standard -> {
-                        CalculatorScreen(
-                            displayValue = calcViewModel.calculationResult.ifEmpty { calcViewModel.currentExpression.ifEmpty { "0" } },
-                            expressionValue = calcViewModel.currentExpression,
-                            isDarkMode = isDarkMode,
-                            onButtonClick = { action -> calcViewModel.onAction(action) }
-                        )
+                        CalculatorScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Formulas -> {
-                        FormulaLibraryScreen(
-                            isDarkMode = isDarkMode,
-                            viewModel = calcViewModel,
-                            onBack = { currentScreen = Screen.Standard }
-                        )
+                        FormulaLibraryScreen(isDarkMode = isDarkMode)
                     }
                     is Screen.Units -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -114,7 +102,6 @@ fun MainNavigation(isDarkMode: Boolean) {
             }
         }
 
-        // Floating AI Assistant Button (FAB) with 3D Frosted Glow
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -126,7 +113,6 @@ fun MainNavigation(isDarkMode: Boolean) {
             }
         }
 
-        // Frosted Glassmorphic Bottom Navigation Bar with Water-Drop Indicator
         Surface(
             shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             color = Color(0xFF0F172A).copy(alpha = 0.80f),
@@ -168,7 +154,6 @@ fun MainNavigation(isDarkMode: Boolean) {
                             }
                             .padding(vertical = 6.dp, horizontal = 2.dp)
                     ) {
-                        // Water-drop / Mercury fluid pill indicator container
                         Box(
                             modifier = Modifier
                                 .size(width = if (selected) 38.dp else 26.dp, height = 26.dp)
@@ -182,9 +167,7 @@ fun MainNavigation(isDarkMode: Boolean) {
                                             )
                                         )
                                     } else {
-                                        Brush.horizontalGradient(
-                                            listOf(Color.Transparent, Color.Transparent)
-                                        )
+                                        Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent))
                                     },
                                     shape = RoundedCornerShape(14.dp)
                                 )
@@ -215,7 +198,6 @@ fun MainNavigation(isDarkMode: Boolean) {
             }
         }
 
-        // AI Assistant Sheet Dialog Overlay
         if (showAiSheet) {
             AIAssistantSheet(
                 onDismiss = { showAiSheet = false }
